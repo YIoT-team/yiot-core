@@ -85,6 +85,10 @@ set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 include (clangformat)
 include (TransitiveToolchainArgs)
 
+if(YIOT_OPENWRT)
+    include (OpenWRT)
+endif()
+
 # ---------------------------------------------------------------------------
 #   Version options
 # ---------------------------------------------------------------------------
@@ -182,7 +186,7 @@ endif()
 #
 #   Tests
 #
-if (NOT MOBILE_PLATFORM)
+if (NOT MOBILE_PLATFORM AND NOT YIOT_OPENWRT)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
 endif()
 
