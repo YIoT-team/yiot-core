@@ -73,6 +73,7 @@ CMakeCache.txt
 **/CMakeFiles/**
 **/depends/**
 **/ipkg-install/**
+**/CONTROL/**
 
 
 
