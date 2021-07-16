@@ -14,8 +14,7 @@ from virgil_trust_provisioner.core_utils.virgil_time import date_to_timestamp
 from virgil_trust_provisioner.core_utils.helpers import b64_to_bytes, to_b64
 
 from virgil_trust_provisioner.consts.modes import ProgramModes
-from virgil_trust_provisioner.core_utils import cloud_key, helpers
-from virgil_trust_provisioner.core_utils.card_requests import CardRequestsHandler
+from virgil_trust_provisioner.core_utils import helpers
 from virgil_trust_provisioner.generators.trustlist import TrustListGenerator
 from virgil_trust_provisioner.generators.keys.virgil import VirgilKeyGenerator
 from virgil_trust_provisioner.data_types.trustlist_type import Signature, PubKeyStructure
@@ -70,14 +69,6 @@ class UtilityManager:
         # chooser
         if self._context.program_mode == ProgramModes.VIRGIL_CRYPTO_ONLY:
             self.key_chooser = self.__db_key_chooser
-
-        # card requests handler
-        self.__card_requests_handler = CardRequestsHandler(
-            self.__ui,
-            self.__logger,
-            self._context.virgil_api_url,
-            self._context.application_token
-        )
 
     def __choose_dates_for_key(self, necessary: bool) -> (int, int):
         """
@@ -274,12 +265,6 @@ class UtilityManager:
                 major, minor, patch = ver_parts[::-1]
             return "{major}.{minor}.{patch}.{build}".format(**locals())
 
-        # Trust list should contain Cloud key
-        if not self.__receive_cloud_key():
-            self.__ui.print_warning("Failed to receive Cloud key")
-            self.__logger.info("Failed to receive Cloud key. Virgil api url: %s" % self._context.virgil_api_url)
-            return
-
         self.__logger.info("TrustList generation started")
         self.__ui.print_message("\nGenerating TrustList...")
 
@@ -390,7 +375,8 @@ class UtilityManager:
         # - prepare key info to be saved
         # -- convert public key to tiny format
         public_key = to_b64(b64_to_bytes(cloud_key_response["key"])[-65:])
-        meta_data = self._context.virgil_api_url
+        meta_data = ""
+        #self._context.virgil_api_url
         key_info = {
             "type": consts.VSKeyTypeS.CLOUD.value,
             "ec_type": consts.ec_type_vs_to_secmodule_map.get(VirgilKeyPair.Type_EC_SECP256R1),
@@ -496,7 +482,6 @@ class UtilityManager:
             card_content["signer_hash_type"] = rec_key_for_sign.hash_type_secmodule
         if extra_card_content:
             card_content.update(extra_card_content)
-        self.__card_requests_handler.create_and_register_card(key, key_info=card_content)
 
         # Save to db
         # - prepare key info to be saved

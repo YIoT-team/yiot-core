@@ -13,12 +13,6 @@ from utils.processes import CmdSubProcess
 if __name__ == "__main__":
     # Parse arguments
     parser = OptionParser()
-    parser.add_option("-t", "--virgil-app-token",
-                      dest="virgil_app_token",
-                      help="Virgil Application token")
-    parser.add_option("-u", "--iot-api-url",
-                      dest="iot_api_url",
-                      help="Virgil IoT api URL")
     parser.add_option("-o", "--output-folder",
                       dest="output_folder",
                       help="path to folder to store utilities output")
@@ -39,8 +33,7 @@ if __name__ == "__main__":
     tp.create_config(config_path=tp_cfg,
                      storage_path=output_folder,
                      log_path=output_folder,
-                     provision_pack_path=provision_pack_folder,
-                     iot_api_url=options.iot_api_url)
+                     provision_pack_path=provision_pack_folder)
 
     # Create sample json with factory info
     tp.create_factory_info_json(factory_info_json)

@@ -155,10 +155,7 @@ def create_config(config_path,
         "log_path": log_path,
         "provision_pack_path": provision_pack_path
     }
-    parser["VIRGIL"] = {
-        "iot_api_url": iot_api_url,
 
-    }
     with open(config_path, "w") as configfile:
         parser.write(configfile)
 

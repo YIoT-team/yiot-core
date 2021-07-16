@@ -32,9 +32,6 @@ class UtilContext:
         self.storage_path = self.__prepare_storage_folder()
         self.provision_pack_path = os.path.expanduser(self._config["MAIN"]["provision_pack_path"])
 
-        self.application_token = self._cli_args["app_token"]
-        self.virgil_api_url = self._config["VIRGIL"]["iot_api_url"]
-
         # Load factory info from specified json file
         self.factory_info = self.__load_factory_info()
 
@@ -46,7 +43,6 @@ class UtilContext:
         )
         arguments.add_argument('-y', '--skip-confirm', action='store_true', help='skip all confirmation requests')
         arguments.add_argument('-c', "--config", metavar="CONFIG_PATH", type=str, help="custom configuration file")
-        arguments.add_argument('-t', "--app-token", required=True, type=str, help="Virgil application token")
         arguments.add_argument('-i', "--factory-info", required=True, type=str,
                                help="path to json with factory info (will be added to Factory key Virgil card)")
         arguments.add_argument('-v', "--version", action="version", version=__version__,
@@ -106,9 +102,6 @@ class UtilContext:
                 "storage_path",
                 "log_path",
                 "provision_pack_path"
-            ],
-            "VIRGIL": [
-                "iot_api_url"
             ]
         }
 
