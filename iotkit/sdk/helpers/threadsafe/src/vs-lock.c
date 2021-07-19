@@ -101,8 +101,6 @@ vs_threadsafe_rwlock_rdlock(vs_rwlock_t *mtx) {
         }
     }
 
-    VS_LOG_INFO("RD_LOCK. r_counter = %u", mtx->r_counter);
-
 terminate:
 
     ret_code = vs_threadsafe_unlock_hal(mtx->r_counter_lock);
@@ -137,7 +135,6 @@ vs_threadsafe_rwlock_rdunlock(vs_rwlock_t *mtx) {
             goto terminate;
         }
     }
-    VS_LOG_INFO("RD_UNLOCK. r_counter = %u", mtx->r_counter);
 
 terminate:
     ret_code = vs_threadsafe_unlock_hal(mtx->r_counter_lock);
