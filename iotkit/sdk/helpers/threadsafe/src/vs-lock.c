@@ -154,7 +154,6 @@ vs_threadsafe_rwlock_wrlock(vs_rwlock_t *mtx) {
     CHECK_NOT_ZERO_RET(mtx, VS_CODE_ERR_NULLPTR_ARGUMENT);
 
     STATUS_CHECK_RET(vs_threadsafe_lock_hal(mtx->w_lock), "Can't take w_lock");
-    VS_LOG_INFO("RW_LOCK");
     return VS_CODE_OK;
 }
 
@@ -165,6 +164,5 @@ vs_threadsafe_rwlock_wrunlock(vs_rwlock_t *mtx) {
     CHECK_NOT_ZERO_RET(mtx, VS_CODE_ERR_NULLPTR_ARGUMENT);
 
     STATUS_CHECK_RET(vs_threadsafe_unlock_hal(mtx->w_lock), "Can't release w_lock");
-    VS_LOG_INFO("RW_UNLOCK");
     return VS_CODE_OK;
 }

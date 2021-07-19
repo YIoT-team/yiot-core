@@ -32,7 +32,6 @@ include(TransitiveToolchainArgs)
 include(helpers)
 
 #   Configure
-set (VIRGIL_IOT_CONFIG_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/config/pc")
 option(ENABLE_TESTING OFF)
 option(ENABLE_HEAVY_TESTS OFF)
 option(VIRGIL_IOT_CLOUD OFF)
