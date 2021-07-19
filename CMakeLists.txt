@@ -35,6 +35,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_LIST_DIR}/iotkit/sdk
 project(yiot VERSION ${KS_TARGET_VERSION} LANGUAGES C)
 
 # ---------------------------------------------------------------------------
+#	Externals
+# ---------------------------------------------------------------------------
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/ext/json)
+
+# ---------------------------------------------------------------------------
 #	YIoT specific
 # ---------------------------------------------------------------------------
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/yiot/common)
