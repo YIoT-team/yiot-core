@@ -1,0 +1,11 @@
+Format: 3.0 (quilt)
+Source: yiot-iotkit-tools
+Binary: yiot-iotkit-tools
+Architecture: any all
+Version: {{MAJOR_VER}}.{{MINOR_VER}}.{{SUB_VER}}-{{BUILD_VER}}
+Maintainer: YIoT Security <support@virgilsecurity.com>
+Homepage: https://yiot-dev.io
+Standards-Version: 3.9.4
+Build-Depends: debhelper (>= 8), dh-python, python3-all-dev, python3-setuptools, txt2man, procps, gcc, doxygen, rsync, swig, cmake (>= 3.12), python3-psutil, python3-cups, python3-pyasn1, git, golang (>= 1.10) | golang-1.10, python3-virgil-sdk, python3-virgil-crypto, python3-pycrc, python3-tinydb, python3-prettytable, libcurl4-openssl-dev
+Package-List:
+ yiot-iotkit-tools deb IOT/Tools optional arch=any

@@ -1,0 +1,43 @@
+%global debug_package %{nil}
+%global pkg_name virgil-sdk
+%global _description \
+Virgil SDK
+
+Summary:          Virgil SDK
+Name:             python-%{pkg_name}
+Version:          {{MAJOR_VER}}.{{MINOR_VER}}.{{SUB_VER}}
+Release:          {{BUILD_VER}}%{?dist}
+License:          BSD-3-Clause
+URL:              https://virgilsecurity.com/
+Source0:          python-%{pkg_name}-%{version}.tgz
+
+BuildRequires:    doxygen
+BuildRequires:    python3-devel
+BuildRequires:    python3-setuptools
+BuildArch:        noarch
+
+%description      %{_description}
+
+%package -n       python3-%{pkg_name}
+Summary:          %{summary}
+%description -n   python3-%{pkg_name}     %{_description}
+
+%prep
+%setup -q -n python-%{pkg_name}-%{version}
+
+%build
+%py3_build
+
+%install
+%py3_install
+
+%files -n python3-%{pkg_name}
+%doc CONTRIBUTION.md
+%doc Components.md
+%doc LICENSE.md
+%doc README.md
+%{python3_sitelib}/examples/
+%{python3_sitelib}/virgil_sdk/
+%{python3_sitelib}/virgil_sdk-%{version}-py3.*.egg-info
+
+%changelog

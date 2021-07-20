@@ -1,0 +1,93 @@
+%global debug_package %{nil}
+
+%global key_manager_name yiot_trust_provisioner
+%global key_manager_vers 0.1.1
+
+Summary:          YIoT IOTKIT tools
+Name:             yiot-iotkit-tools
+Version:          {{MAJOR_VER}}.{{MINOR_VER}}.{{SUB_VER}}
+Release:          {{BUILD_VER}}%{?dist}
+Group:            IOT
+License:          BSD-3-Clause
+URL:              https://yiot-dev.io/
+Source0:         %{name}-%{version}.tgz
+
+Requires:        python3-psutil
+Requires:        python3-pyasn1
+Requires:        python3-prettytable
+
+
+BuildRequires:    doxygen
+BuildRequires:    gcc
+BuildRequires:    gcc-c++
+BuildRequires:    golang >= 1.10
+BuildRequires:    git
+BuildRequires:    swig
+BuildRequires:    rsync
+BuildRequires:    python3-tinydb
+BuildRequires:    python3-psutil
+BuildRequires:    python3-pyasn1
+BuildRequires:    python3-PyCRC
+BuildRequires:    python3-cups
+BuildRequires:    python3-virgil-sdk
+BuildRequires:    python3-virgil-crypto
+BuildRequires:    python3-prettytable
+BuildRequires:    libcurl-devel
+
+%if 0%{?rhel}
+BuildRequires:    cmake3
+%else
+BuildRequires:    cmake  >= 3.11
+%endif
+
+BuildRequires:    python3-devel
+BuildRequires:    python3-setuptools
+
+%description      
+YIoT Security IOT SDK
+
+%prep
+%setup -q -n %{name}-%{version}
+
+%build
+export GOPATH=$(pwd)/build/go
+export GOOS=linux
+%ifarch %{arm}
+  export GOARCH=arm
+%endif
+
+# Building virgil-crypto
+pushd build/demo/nix/iotkit/go/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/ext/virgil-crypto
+ cmake -H. -B_build -DCMAKE_INSTALL_PREFIX=../../ -DLANG=go -DINSTALL_CORE_LIBS=ON; cmake --build _build --target install
+popd
+
+cmake3  -DTHING_MANUFACTURE=VIRGIL -DTHING_MODEL=MCU1 -Bbuild -DGO_ENABLE=ON -H.
+make -C build vs-tool-yiot-firmware-signer %{?_smp_mflags}
+
+%install
+pushd sdk/tools/yiot-trust-provisioner
+%py3_build
+%py3_install
+popd
+
+rm -f %{_bindir}/virgil-dbconverter
+
+install -d                                                                                                       %{buildroot}%{_bindir}/
+install -d                                                                                                       %{buildroot}%{_libdir}/
+install -d                                                                                                       %{buildroot}%{_sysconfdir}/yiot-trust-provisioner/
+
+install -p -m 644 sdk/tools/yiot-trust-provisioner/samples/provisioner.conf                     	         %{buildroot}%{_sysconfdir}/yiot-trust-provisioner/
+install -p -m 755 build/demo/nix/iotkit/modules/crypto/converters/libconverters.so                               %{buildroot}%{_libdir}/
+install -p -m 755 build/demo/nix/iotkit/tools/yiot-firmware-signer/yiot-firmware-signer                        %{buildroot}%{_bindir}/
+
+%files
+%doc README.md
+%doc sdk/VERSION
+%config(noreplace) %{_sysconfdir}/yiot-trust-provisioner/provisioner.conf
+%{python3_sitelib}/%{key_manager_name}
+%{python3_sitelib}/%{key_manager_name}-%{key_manager_vers}-py3.*.egg-info
+%{_bindir}/yiot-trust-provisioner
+%{_bindir}/yiot-firmware-signer        
+%{_libdir}/*
+
+%changelog
