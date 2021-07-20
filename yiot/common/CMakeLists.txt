@@ -42,7 +42,6 @@ option(VIRGIL_IOT_DEFAULT_CLOUD_MESSAGE_BIN_AWS OFF)
 
 #   Add
 add_subdirectory(${IOTKIT_PATH}/sdk iotkit)
-add_subdirectory(${IOTKIT_PATH}/demo/nix/common iotkit-nix-common)
 
 # ---------------------------------------------------------------------------
 #	IoTKit extensions
