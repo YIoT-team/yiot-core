@@ -5,6 +5,9 @@ import sys
 from contextlib import contextmanager
 from typing import Union, Optional
 
+from hashlib import sha256
+from Cryptodome.Cipher import AES
+
 from virgil_trust_provisioner.core_utils import CRCCCITT
 from prettytable import PrettyTable
 from virgil_crypto import VirgilKeyPair
@@ -32,6 +35,7 @@ class UtilityManager:
         self._context = util_context
         self.__ui = self._context.ui
         self.__logger = self._context.logger
+        self.__yiot_app_storage_path = os.path.join(self._context.storage_path, "yiot-export")
         self.__key_storage_path = os.path.join(self._context.storage_path, "key_storage")
         self.__key_storage_private_keys = os.path.join(self.__key_storage_path, "private")
         self.__key_storage_public_keys = os.path.join(self.__key_storage_path, "pubkeys")
@@ -729,6 +733,7 @@ class UtilityManager:
                 ["Export data as provision package for Factory", self.__create_provision_pack],
                 ["Export upper level Public Keys", self.__export_upper_level_pub_keys],
                 ["Export Private Keys", self.__get_all_private_keys],
+                ["Export for YIoT app", self.__export_for_yiot],
                 ["---"],
                 ["Exit", self.__exit]
             ])
@@ -795,6 +800,124 @@ class UtilityManager:
         self.__get_private_keys(self.__auth_private_keys)
         self.__get_private_keys(self.__recovery_private_keys)
         self.__get_private_keys(self.__trust_list_private_keys)
+        self.__ui.print_message("Export finished")
+
+    def __long_to_bytes(self, val, endianness='big'):
+        byte_buffer = io.BytesIO()
+        byte_buffer.write(int(val).to_bytes(4, byteorder=endianness, signed=False))
+        return bytearray(byte_buffer.getvalue())
+
+    def __get_storage_key_pairs_data(self, key_type, io_buffer):
+        private_keys_db, public_keys_db = self.__keys_type_to_storage_map[key_type]
+
+        storage_keys = private_keys_db.get_keys()
+        if not storage_keys:
+            self.__logger.error("Db {} empty or not exist".format(private_keys_db.storage_path))
+            self.__ui.print_warning("Db {} empty or not exist".format(private_keys_db.storage_path))
+            return
+
+        for key_id in private_keys_db.get_keys():
+            one_key_pair_buffer = io.BytesIO()
+            private_key_info = private_keys_db.get_value(key_id)
+            public_key_info =public_keys_db.get_value(key_id)
+
+            # EC type NIST256
+            one_key_pair_buffer.write(self.__long_to_bytes(public_key_info["ec_type"]))
+            
+            # Key type : recovery, auth ...
+            key_type_str = consts.VSKeyTypeS(public_key_info["type"])
+            one_key_pair_buffer.write(self.__long_to_bytes(consts.key_type_str_to_num_map[key_type_str]))
+            
+            # Private key
+            priv_key = b64_to_bytes(private_key_info["key"])
+            one_key_pair_buffer.write(self.__long_to_bytes(len(priv_key)))
+            one_key_pair_buffer.write(priv_key)
+
+            # Public key
+            pub_key = b64_to_bytes(public_key_info["key"])
+            one_key_pair_buffer.write(self.__long_to_bytes(len(pub_key)))
+            one_key_pair_buffer.write(pub_key)
+
+            # Start date 
+            one_key_pair_buffer.write(b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
+            
+            # End date 
+            one_key_pair_buffer.write(b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00")
+
+            # Signature
+            if "signature" in public_key_info:
+                signature_buffer = io.BytesIO()
+                signer_id = public_key_info["signer_key_id"]
+                signature = public_key_info["signature"]
+                signature_hash_type = public_key_info["signer_hash_type"]
+                signer_public_key_info = self.__upper_level_pub_keys.get_value(signer_id)
+
+                sign_key_type_str = consts.VSKeyTypeS(signer_public_key_info["type"])
+                signature_buffer.write(consts.key_type_str_to_num_map[sign_key_type_str].to_bytes(1, byteorder='big', signed=False))
+                signature_buffer.write(signer_public_key_info["ec_type"].to_bytes(1, byteorder='big', signed=False))
+                signature_buffer.write(signature_hash_type.to_bytes(1, byteorder='big', signed=False))
+                signature_buffer.write(b64_to_bytes(signature))
+                signature_buffer.write(b64_to_bytes(signer_public_key_info["key"]))
+
+                signature_data = bytes(signature_buffer.getvalue())
+                signature_data_len = len(signature_data)
+                one_key_pair_buffer.write(self.__long_to_bytes(signature_data_len))
+                one_key_pair_buffer.write(signature_data)
+            else:
+                one_key_pair_buffer.write(self.__long_to_bytes(0))
+
+            one_keypair_data = bytes(one_key_pair_buffer.getvalue())
+            one_keypair_data_len = len(one_keypair_data)
+            io_buffer.write(self.__long_to_bytes(one_keypair_data_len))
+            io_buffer.write(one_keypair_data)
+
+    def __export_for_yiot(self):
+        password = self.__ui.get_user_input("Encryption password: ", empty_allow=False).encode('utf-8')
+        self.__ui.print_message("Exporting for YIoT application ...")
+        shutil.rmtree(self.__yiot_app_storage_path, ignore_errors=True)
+        self.__logger.debug("Creating {}".format(self.__yiot_app_storage_path))
+        os.makedirs(self.__yiot_app_storage_path)
+
+        byte_buffer = io.BytesIO()
+
+        # Serialize all keys
+        self.__get_storage_key_pairs_data(consts.VSKeyTypeS.RECOVERY, byte_buffer)
+        self.__get_storage_key_pairs_data(consts.VSKeyTypeS.AUTH, byte_buffer)
+        self.__get_storage_key_pairs_data(consts.VSKeyTypeS.TRUSTLIST, byte_buffer)
+        self.__get_storage_key_pairs_data(consts.VSKeyTypeS.FIRMWARE, byte_buffer)
+        self.__get_storage_key_pairs_data(consts.VSKeyTypeS.FACTORY, byte_buffer)
+
+        # Serialize TrustList
+        # - find latest TrustLIst
+        trust_lists = helpers.find_files(self.__key_storage_path, "TrustList_")
+        if not trust_lists:
+            self.__ui.print_error("TrustList needed for YIoT app not found. Please generate it.")
+            return
+        *_, latest_tl_path = sorted(trust_lists, key=lambda path: os.path.getmtime(path))
+        file = open(latest_tl_path, "rb")
+        content = file.read()
+        file.close()
+        byte_buffer.write(self.__long_to_bytes(len(content)))
+        byte_buffer.write(content)
+
+        key = sha256(password).digest()
+        iv = sha256(key).digest()[:12]
+        to_be_enc = bytes(byte_buffer.getvalue())
+        to_be_enc_len = len(to_be_enc)
+        additional_len = 16 - to_be_enc_len % 16
+
+        byte_buffer.write(bytearray([additional_len] * additional_len))
+            
+        cipher = AES.new(key, AES.MODE_GCM, nonce=iv)
+        ciphertext, tag = cipher.encrypt_and_digest(bytes(byte_buffer.getvalue()))
+
+        byte_buffer_enc = io.BytesIO()
+        byte_buffer_enc.write(ciphertext)
+        byte_buffer_enc.write(tag)
+
+        file_path = os.path.join(self.__yiot_app_storage_path, "yiot.rot")
+        open(file_path, "wb").write(bytes(byte_buffer_enc.getvalue()))
+
         self.__ui.print_message("Export finished")
 
     def __create_provision_pack(self):

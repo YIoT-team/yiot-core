@@ -118,8 +118,8 @@ class Core:
 
     def run(self):
         try:
-            if self.__is_have_run_instance():
-                sys.exit("[FATAL]: Running multiple instances is forbidden")
+            # if self.__is_have_run_instance():
+                # sys.exit("[FATAL]: Running multiple instances is forbidden")
             while True:
                 self.__util_manager.run_utility()
         except SystemExit:
