@@ -1,5 +1,5 @@
-from virgil_trust_provisioner import consts
-from virgil_trust_provisioner.data_types.trustlist_type import TrustList
+from yiot_trust_provisioner import consts
+from yiot_trust_provisioner.data_types.trustlist_type import TrustList
 
 
 class TrustListGenerator:

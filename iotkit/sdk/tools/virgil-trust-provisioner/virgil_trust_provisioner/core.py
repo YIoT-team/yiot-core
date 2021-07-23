@@ -8,11 +8,11 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 
 import psutil
 
-from virgil_trust_provisioner import __version__
-from virgil_trust_provisioner.core_utils.config import Config
-from virgil_trust_provisioner.consts.modes import ProgramModes
-from virgil_trust_provisioner.ui import UI
-from virgil_trust_provisioner.utility_manager import UtilityManager
+from yiot_trust_provisioner import __version__
+from yiot_trust_provisioner.core_utils.config import Config
+from yiot_trust_provisioner.consts.modes import ProgramModes
+from yiot_trust_provisioner.ui import UI
+from yiot_trust_provisioner.utility_manager import UtilityManager
 
 
 class UtilContext:
@@ -112,7 +112,7 @@ class UtilContext:
 class Core:
     def __init__(self):
         self._util_context = UtilContext()
-        self.pid_file_path = os.path.join(str(Path.home()), '.virgil_trust_provisioner', 'virgil_trust_provisioner.pid')
+        self.pid_file_path = os.path.join(str(Path.home()), '.yiot_trust_provisioner', 'yiot_trust_provisioner.pid')
         self._ui = None
         self._util_manager = None
 

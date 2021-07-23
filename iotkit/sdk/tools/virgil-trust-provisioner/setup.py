@@ -1,8 +1,8 @@
-from virgil_trust_provisioner import __version__, __author__
+from yiot_trust_provisioner import __version__, __author__
 from setuptools import setup, find_packages
 
 setup(
-    name="virgil_trust_provisioner",
+    name="yiot_trust_provisioner",
     version=__version__,
     packages=find_packages(exclude=('tests',)),
     install_requires=[
@@ -16,12 +16,12 @@ setup(
     entry_points={
         'console_scripts':
             [
-                'virgil-trust-provisioner = virgil_trust_provisioner.__main__:main'
+                'yiot-trust-provisioner = yiot_trust_provisioner.__main__:main'
             ]
     },
     author=__author__,
-    author_email="support@virgilsecurity.com",
-    url="https://virgilsecurity.com/",
+    author_email="support@yiot-dev.io",
+    url="https://yiot-dev.io/",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: BSD License",
@@ -30,6 +30,6 @@ setup(
         "Topic :: Security :: Cryptography",
         ],
     license="BSD",
-    description="Virgil Trust Provisioner cli",
-    long_description="Virgil Trust Provisioner cli",
+    description="Yiot Trust Provisioner cli",
+    long_description="Yiot Trust Provisioner cli",
 )

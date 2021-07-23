@@ -1,14 +1,14 @@
 import io
 from typing import Optional
 
-from virgil_trust_provisioner.core_utils import CRCCCITT
+from yiot_trust_provisioner.core_utils import CRCCCITT
 
 from virgil_crypto import VirgilCrypto, VirgilKeyPair
 from virgil_crypto.hashes import HashAlgorithm
 
-from virgil_trust_provisioner.generators.keys.interface import KeyGeneratorInterface
-from virgil_trust_provisioner.core_utils import VirgilSignExtractor
-from virgil_trust_provisioner.core_utils.helpers import to_b64, b64_to_bytes
+from yiot_trust_provisioner.generators.keys.interface import KeyGeneratorInterface
+from yiot_trust_provisioner.core_utils import VirgilSignExtractor
+from yiot_trust_provisioner.core_utils.helpers import to_b64, b64_to_bytes
 
 
 class VirgilKeyGenerator(KeyGeneratorInterface):

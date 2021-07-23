@@ -1,8 +1,8 @@
 import os
 
-from virgil_trust_provisioner.core_utils import CRCCCITT
+from yiot_trust_provisioner.core_utils import CRCCCITT
 
-from virgil_trust_provisioner.data_types import TrustList
+from yiot_trust_provisioner.data_types import TrustList
 
 
 class FileKeyStorage:

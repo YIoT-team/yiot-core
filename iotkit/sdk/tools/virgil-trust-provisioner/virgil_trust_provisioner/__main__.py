@@ -2,7 +2,7 @@ import os
 
 import logging
 
-from virgil_trust_provisioner.core import Core
+from yiot_trust_provisioner.core import Core
 
 
 def main():

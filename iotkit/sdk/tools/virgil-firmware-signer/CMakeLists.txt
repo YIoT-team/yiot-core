@@ -34,19 +34,19 @@
 
 cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
 
-project(vs-tool-virgil-firmware-signer VERSION 0.1.0 LANGUAGES Go)
+project(vs-tool-yiot-firmware-signer VERSION 0.1.0 LANGUAGES Go)
 
 
 if(NOT VIRGIL_IOT_DIRECTORY)
-    message(FATAL_ERROR "[vs-tool-virgil-firmware-signer] VIRGIL_IOT_DIRECTORY variable containing path to the Virgil IOT SDK source is not specified")
+    message(FATAL_ERROR "[vs-tool-yiot-firmware-signer] VIRGIL_IOT_DIRECTORY variable containing path to the Virgil IOT SDK source is not specified")
 else()
-    message(STATUS "[vs-tool-virgil-firmware-signer] path to the Virgil IOT SDK source : ${VIRGIL_IOT_DIRECTORY}")
+    message(STATUS "[vs-tool-yiot-firmware-signer] path to the Virgil IOT SDK source : ${VIRGIL_IOT_DIRECTORY}")
 endif()
 
 if(NOT VIRGIL_IOT_BINARY_DIRECTORY)
-    message(FATAL_ERROR "[vs-tool-virgil-firmware-signer] VIRGIL_IOT_BINARY_DIRECTORY variable containing path to the Virgil IOT SDK binary is not specified")
+    message(FATAL_ERROR "[vs-tool-yiot-firmware-signer] VIRGIL_IOT_BINARY_DIRECTORY variable containing path to the Virgil IOT SDK binary is not specified")
 else()
-    message(STATUS "[vs-tool-virgil-firmware-signer] path to the Virgil IOT SDK binary : ${VIRGIL_IOT_BINARY_DIRECTORY}")
+    message(STATUS "[vs-tool-yiot-firmware-signer] path to the Virgil IOT SDK binary : ${VIRGIL_IOT_BINARY_DIRECTORY}")
 endif()
 
 #
@@ -91,4 +91,4 @@ install(DIRECTORY ${CMAKE_BINARY_DIR}/depends/installed/lib DESTINATION ${CMAKE_
 #
 #   Virgil Signer
 #
-add_go_executable(vs-tool-virgil-firmware-signer virgil-firmware-signer converters ${LIBS_TARGET})
+add_go_executable(vs-tool-yiot-firmware-signer yiot-firmware-signer converters ${LIBS_TARGET})
