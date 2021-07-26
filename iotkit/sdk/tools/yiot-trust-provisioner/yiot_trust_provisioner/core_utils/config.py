@@ -40,4 +40,4 @@ class Config(Mapping):
 
 
 def _get_default_config_path():
-    return '/etc/virgil-trust-provisioner/provisioner.conf'
+    return '/etc/yiot-trust-provisioner/provisioner.conf'

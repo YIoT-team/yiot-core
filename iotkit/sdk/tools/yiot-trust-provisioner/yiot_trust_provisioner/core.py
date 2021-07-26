@@ -70,7 +70,7 @@ class UtilContext:
         return storage
 
     def __prepare_logger(self):
-        logger = logging.getLogger("virgil-trust-provisioner-logger")
+        logger = logging.getLogger("yiot-trust-provisioner-logger")
         logger.setLevel(logging.INFO)
 
         # Create folder for logs if not exists and path specified for HOME
@@ -82,7 +82,7 @@ class UtilContext:
                 sys.exit("[FATAL]: Path for logs specified in config doesn't exist: %s" % log_path)
 
         # Add file handler
-        file_handler = logging.FileHandler(os.path.join(log_path, "virgil-trust-provisioner.log"))
+        file_handler = logging.FileHandler(os.path.join(log_path, "yiot-trust-provisioner.log"))
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(
             logging.Formatter(

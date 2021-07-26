@@ -57,15 +57,15 @@ export GOOS=linux
 %endif
 
 # Building virgil-crypto
-pushd build/demo/nix/iotkit/go/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/ext/virgil-crypto
+pushd build/go/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/ext/virgil-crypto
  cmake -H. -B_build -DCMAKE_INSTALL_PREFIX=../../ -DLANG=go -DINSTALL_CORE_LIBS=ON; cmake --build _build --target install
 popd
 
-cmake3  -DTHING_MANUFACTURE=VIRGIL -DTHING_MODEL=MCU1 -Bbuild -DGO_ENABLE=ON -H.
+cmake3 -DVIRGIL_IOT_CONFIG_DIRECTORY=$(pwd)/config/pc -DTHING_MANUFACTURE=VIRGIL -DTHING_MODEL=MCU1 -Bbuild -DGO_ENABLE=ON -H.
 make -C build vs-tool-yiot-firmware-signer %{?_smp_mflags}
 
 %install
-pushd sdk/tools/yiot-trust-provisioner
+pushd tools/yiot-trust-provisioner
 %py3_build
 %py3_install
 popd
@@ -76,13 +76,12 @@ install -d                                                                      
 install -d                                                                                                       %{buildroot}%{_libdir}/
 install -d                                                                                                       %{buildroot}%{_sysconfdir}/yiot-trust-provisioner/
 
-install -p -m 644 sdk/tools/yiot-trust-provisioner/samples/provisioner.conf                     	         %{buildroot}%{_sysconfdir}/yiot-trust-provisioner/
-install -p -m 755 build/demo/nix/iotkit/modules/crypto/converters/libconverters.so                               %{buildroot}%{_libdir}/
-install -p -m 755 build/demo/nix/iotkit/tools/yiot-firmware-signer/yiot-firmware-signer                        %{buildroot}%{_bindir}/
+install -p -m 644 tools/yiot-trust-provisioner/samples/provisioner.conf                        	                 %{buildroot}%{_sysconfdir}/yiot-trust-provisioner/
+install -p -m 755 build/modules/crypto/converters/libconverters.so                                               %{buildroot}%{_libdir}/
+install -p -m 755 build/tools/yiot-firmware-signer/yiot-firmware-signer                                          %{buildroot}%{_bindir}/
 
 %files
-%doc README.md
-%doc sdk/VERSION
+%doc VERSION
 %config(noreplace) %{_sysconfdir}/yiot-trust-provisioner/provisioner.conf
 %{python3_sitelib}/%{key_manager_name}
 %{python3_sitelib}/%{key_manager_name}-%{key_manager_vers}-py3.*.egg-info
