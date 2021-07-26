@@ -1,0 +1,11 @@
+Format: 3.0 (quilt)
+Source: python-virgil-sdk
+Binary: python3-virgil-sdk
+Architecture: all
+Version: {{MAJOR_VER}}.{{MINOR_VER}}.{{SUB_VER}}-{{BUILD_VER}}
+Maintainer: Eduard Ponomarenko <eponomarenko@virgilsecurity.com>
+Homepage: https://virgilsecurity.com
+Standards-Version: 3.9.4
+Build-Depends: debhelper (>= 8), dh-python, python3-all-dev, python3-setuptools, txt2man, procps
+Package-List:
+ python3-virgil-sdk deb IOT/libs optional arch=any

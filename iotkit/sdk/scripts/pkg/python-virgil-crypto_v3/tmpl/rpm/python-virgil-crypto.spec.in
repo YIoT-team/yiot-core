@@ -1,0 +1,68 @@
+%global debug_package %{nil}
+%global pkg_name virgil-crypto
+%global _description \
+Virgil Security provides a set of APIs for adding security to any application.\
+In a few simple steps you can encrypt communication, securely store data, provide\
+passwordless login, and ensure data integrity. Virgil Python Crypto Library is a\
+high-level cryptographic library that allows you to perform all necessary\
+operations for secure storing and transferring data and everything required to\
+become HIPAA and GDPR compliant.
+
+Summary:          Virgil Security provides a set of APIs for adding security to any application.
+Name:             python-%{pkg_name}
+Version:          3.3.0
+Release:          {{BUILD_VER}}%{?dist}
+License:          BSD-3-Clause
+URL:              https://virgilsecurity.com/
+Source0:          python-%{pkg_name}-%{version}.tgz
+Requires:         python36
+
+
+%if 0%{?rhel}
+BuildRequires:    cmake3
+%else
+BuildRequires:    cmake  >= 3.11
+%endif
+
+BuildRequires:    zlib-devel
+BuildRequires:    gcc
+BuildRequires:    gcc-c++
+BuildRequires:    doxygen
+BuildRequires:    swig
+BuildRequires:    python3-devel
+BuildRequires:    python3-setuptools
+
+%description      %{_description}
+
+%package -n       python3-%{pkg_name}
+Summary:          %{summary}
+%description -n   python3-%{pkg_name}     %{_description}
+
+%prep
+%setup -q -n python-%{pkg_name}-%{version}
+
+%build
+export CRYPTO_VERSION=%{version}
+
+rm -rf ext/virgil-crypto/build
+mkdir -p ext/virgil-crypto/build/python/%{python3_version}
+
+pushd ext/virgil-crypto/build/python/%{python3_version}
+  cmake3 -DCMAKE_BUILD_TYPE=Release -DVIRGIL_CRYPTO_FEATURE_LOW_LEVEL_WRAP=ON -DLANG_VERSION=%{python3_version} -DLANG=python ../../..
+make %{?_smp_mflags}
+popd
+
+%install
+export CRYPTO_VERSION=%{version}
+cp -af ext/virgil-crypto/build/python/%{python3_version}/wrappers/python/_virgil_crypto_python.so virgil_crypto
+cp -af ext/virgil-crypto/build/python/%{python3_version}/wrappers/python/virgil_crypto_python.py  virgil_crypto
+
+%py3_build
+%py3_install
+
+%files -n python3-%{pkg_name}
+%doc README.md
+%{python3_sitelib}/virgil_crypto/
+%{python3_sitelib}/virgil_crypto-%{version}-py3.*.egg-info
+
+%changelog

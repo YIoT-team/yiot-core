@@ -45,6 +45,37 @@ format_list.txt
 # Python
 __pycache__/
 
+####
+# OpenWRT
+*.o
+*.so
+*.a
+*.internal
+cmake_clean*.cmake
+progress.make
+depend.make
+build.make
+DependInfo.cmake
+C.includecache
+progress.marks
+Makefile
+link.txt
+.built
+.source_dir
+.prepared
+.quilt_checked
+.configured*
+transitive-args.cmake
+install_manifest.txt
+flags.make
+cmake_install.cmake
+CMakeCache.txt
+**/CMakeFiles/**
+**/depends/**
+**/ipkg-install/**
+**/CONTROL/**
+
+
 
 
 !sdk/config

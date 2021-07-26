@@ -53,7 +53,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/virgil-device-registrar)
 #
 #   Signer
 #
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/virgil-firmware-signer)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/yiot-firmware-signer)
 
 #
 #   SNAPD

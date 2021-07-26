@@ -1,3 +1,4 @@
+#!/bin/bash
 #  ────────────────────────────────────────────────────────────
 #                     ╔╗  ╔╗ ╔══╗      ╔════╗
 #                     ║╚╗╔╝║ ╚╣╠╝      ║╔╗╔╗║
@@ -17,35 +18,49 @@
 #    Lead Maintainer: Roman Kutashenko <kutashenko@gmail.com>
 #  ────────────────────────────────────────────────────────────
 
-cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
+set -e
+SCRIPT_PATH="$(cd $(dirname "$0") >/dev/null 2>&1 && pwd)"
+source ${SCRIPT_PATH}/SETTINGS
 
-project(yiot-common VERSION 0.1.0 LANGUAGES C)
+BUILD_DIR="${SCRIPT_PATH}/build"
 
-# ---------------------------------------------------------------------------
-#	IoTKit
-# ---------------------------------------------------------------------------
+#######################################################################################################################
+echo_title() {
+  echo "#========================"
+  echo "#= ${@}"
+  echo "#========================"
+}
 
-set (IOTKIT_PATH "${CMAKE_CURRENT_LIST_DIR}/../../iotkit")
-set (CMAKE_MODULE_PATH "${IOTKIT_PATH}/sdk/cmake" ${CMAKE_MODULE_PATH})
 
-include(TransitiveToolchainArgs)
-include(helpers)
+#######################################################################################################################
+create_dir() {
+  rm -rf ${BUILD_DIR}
+  mkdir -p ${BUILD_DIR}
+}
 
-#   Configure
-option(ENABLE_TESTING OFF)
-option(ENABLE_HEAVY_TESTS OFF)
-option(VIRGIL_IOT_CLOUD OFF)
-option(VIRGIL_IOT_HIGH_LEVEL OFF)
-option(VIRGIL_IOT_THREADSAFE ON)
-option(VIRGIL_IOT_DEFAULT_CLOUD_CURL_HTTP OFF)
-option(VIRGIL_IOT_DEFAULT_CLOUD_MESSAGE_BIN_AWS OFF)
+#######################################################################################################################
+build_rpm() {
+  echo_title "Build RPMS"
+  pushd ${SCRIPT_PATH}
+    ./virgil-iotkit-tools-pkg.sh
+  popd
+}
 
-#   Add
-add_subdirectory(${IOTKIT_PATH}/sdk iotkit)
+#######################################################################################################################
+build_docker() {
+  echo_title "Build docker image"
+  pushd ${SCRIPT_PATH}
+    cp Docker/Docker-virgil-iotkit-tools                      build/Dockerfile
+    cp -f result/python3-PyCRC-*.el8.noarch.rpm          build       
+    cp -f result/python3-tinydb-*.el8.noarch.rpm       build    
+    cp -f result/python3-virgil-crypto-*.el8.x86_64.rpm build
+    cp -f result/python3-virgil-sdk-*.el8.noarch.rpm    build
+    cp -f result/yiot-iotkit-tools-*.el8.x86_64.rpm     build
+    sudo docker build -t ${DOCKER_IMAGE0} -t ${DOCKER_IMAGE1} build
+  popd
+}
 
-# ---------------------------------------------------------------------------
-#	IoTKit extensions
-# ---------------------------------------------------------------------------
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/protocols/snap")
-add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/qos1")
-
+#######################################################################################################################
+create_dir
+build_rpm
+build_docker

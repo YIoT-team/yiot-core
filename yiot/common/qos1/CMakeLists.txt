@@ -81,7 +81,6 @@ target_link_libraries(yiot-qos1-helper
         PRIVATE
 
         #   IoTKit
-        nix-common
         vs-module-snap-thing
 
         #   Helpers
