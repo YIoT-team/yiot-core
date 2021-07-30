@@ -17,8 +17,7 @@ from yiot_trust_provisioner.core_utils.virgil_time import date_to_timestamp
 from yiot_trust_provisioner.core_utils.helpers import b64_to_bytes, to_b64
 
 from yiot_trust_provisioner.consts.modes import ProgramModes
-from yiot_trust_provisioner.core_utils import cloud_key, helpers
-from yiot_trust_provisioner.core_utils.card_requests import CardRequestsHandler
+from yiot_trust_provisioner.core_utils import helpers
 from yiot_trust_provisioner.generators.trustlist import TrustListGenerator
 from yiot_trust_provisioner.generators.keys.virgil import VirgilKeyGenerator
 from yiot_trust_provisioner.data_types.trustlist_type import Signature, PubKeyStructure
@@ -360,43 +359,6 @@ class UtilityManager:
         self.__ui.print_message("Factory Key deleted")
         key_id = factory_keys_info[user_choice][1]
         self.__logger.info("Factory Key with id: [{}] deleted".format(key_id))
-
-    def __receive_cloud_key(self) -> bool:
-        """
-        Receive Cloud key from service and save it to db with trust list public keys
-        """
-        # Initialize cloud key (if needed)
-        self.__ui.print_message("Try to initialize Cloud key on service")
-        self.__logger.info("Try to initialize Cloud key on service")
-        cloud_key.init_cloud_key(self._context, self.__logger, self.__ui)
-
-        # Retrieve public cloud key
-        self.__ui.print_message("Receive Cloud public key from service")
-        self.__logger.info("Receive Cloud public key from service")
-        cloud_key_response = cloud_key.receive_cloud_public_key(self._context, self.__logger, self.__ui)
-        self.__logger.info("Cloud key received: %s" % cloud_key_response)
-
-        # Save public key to db
-        # - prepare key info to be saved
-        # -- convert public key to tiny format
-        public_key = to_b64(b64_to_bytes(cloud_key_response["key"])[-65:])
-        meta_data = ""
-        #self._context.virgil_api_url
-        key_info = {
-            "type": consts.VSKeyTypeS.CLOUD.value,
-            "ec_type": consts.ec_type_vs_to_secmodule_map.get(VirgilKeyPair.Type_EC_SECP256R1),
-            "start_date": cloud_key_response["start_date"],
-            "expiration_date": cloud_key_response["end_date"],
-            "comment": "Cloud public key",
-            "key": public_key,
-            "meta_data": meta_data
-        }
-        # - save
-        self.__trust_list_pub_keys.save("cloud_key", key_info, suppress_db_warning=False)
-
-        self.__ui.print_message("Cloud key received and stored")
-        self.__logger.info("Cloud key stored. key_info: %s" % key_info)
-        return True
 
     def __generate_key(
             self,
