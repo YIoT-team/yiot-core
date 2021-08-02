@@ -2,8 +2,10 @@ import io
 import os
 import shutil
 import sys
+import json 
 from contextlib import contextmanager
 from typing import Union, Optional
+from datetime import datetime
 
 from hashlib import sha256
 from Cryptodome.Cipher import AES
@@ -13,7 +15,7 @@ from prettytable import PrettyTable
 from virgil_crypto import VirgilKeyPair
 
 from yiot_trust_provisioner import consts
-from yiot_trust_provisioner.core_utils.virgil_time import date_to_timestamp
+from yiot_trust_provisioner.core_utils.virgil_time import date_to_timestamp, timestamp_to_str
 from yiot_trust_provisioner.core_utils.helpers import b64_to_bytes, to_b64
 
 from yiot_trust_provisioner.consts.modes import ProgramModes
@@ -36,9 +38,11 @@ class UtilityManager:
         self.__ui = self._context.ui
         self.__logger = self._context.logger
         self.__yiot_app_storage_path = os.path.join(self._context.storage_path, "yiot-export")
+        self.__license_storage_path = os.path.join(self._context.storage_path, "licenses")
         self.__key_storage_path = os.path.join(self._context.storage_path, "key_storage")
         self.__key_storage_private_keys = os.path.join(self.__key_storage_path, "private")
         self.__key_storage_public_keys = os.path.join(self.__key_storage_path, "pubkeys")
+
         self.__upper_level_keys_count = 2
         self._utility_list = dict()
         self.__check_db_path()
@@ -48,12 +52,14 @@ class UtilityManager:
         self.__trust_list_pub_keys = self.__init_storage("TrustListPubKeys")
         self.__factory_priv_keys = self.__init_storage("FactoryPrivateKeys")
         self.__trust_list_version_db = self.__init_storage("TrustListVersions")
+        self.__license_pub_keys = self.__init_storage("LicenseKeys")
 
         # private keys db's
         self.__firmware_priv_keys = self.__init_storage("FirmwarePrivateKeys")
         self.__auth_private_keys = self.__init_storage("AuthPrivateKeys")
         self.__recovery_private_keys = self.__init_storage("RecoveryPrivateKeys")
         self.__trust_list_private_keys = self.__init_storage("TLServicePrivateKeys")
+        self.__license_priv_keys = self.__init_storage("LicensePrivateKeys")
 
         self.__keys_type_to_storage_map = {
             consts.VSKeyTypeS.AUTH:              (self.__auth_private_keys, self.__upper_level_pub_keys),
@@ -62,6 +68,7 @@ class UtilityManager:
             consts.VSKeyTypeS.TRUSTLIST:         (self.__trust_list_private_keys, self.__upper_level_pub_keys),
             consts.VSKeyTypeS.FACTORY:           (self.__factory_priv_keys, self.__trust_list_pub_keys),
             consts.VSKeyTypeS.CLOUD:             (None, self.__trust_list_pub_keys),  # private key is stored on cloud
+            consts.VSKeyTypeS.LICENSE:           (self.__license_priv_keys, self.__license_pub_keys),
         }
         self.__logger.info("initialization successful")
 
@@ -656,6 +663,7 @@ class UtilityManager:
                     empty_allow=False
                 )
             ).upper()
+
         if user_choice == "N":
             self.run_utility()
         else:
@@ -697,6 +705,10 @@ class UtilityManager:
                 ["Export upper level Public Keys", self.__export_upper_level_pub_keys],
                 ["Export Private Keys", self.__get_all_private_keys],
                 ["Export for YIoT app", self.__export_for_yiot],
+                ["---"],
+                ["Create Root User", self.__create_root_user],
+                ["Create customer credentials", self.__create_customer_cred],
+                ["Generate License", self.__generate_license],
                 ["---"],
                 ["Exit", self.__exit]
             ])
@@ -834,8 +846,40 @@ class UtilityManager:
             io_buffer.write(self.__long_to_bytes(one_keypair_data_len))
             io_buffer.write(one_keypair_data)
 
+    def __encrypt_with_password(self, data, password):
+        byte_buffer = io.BytesIO()
+        byte_buffer.write(data)
+
+        key = sha256(password).digest()
+        iv = sha256(key).digest()[:12]
+        to_be_enc = bytes(byte_buffer.getvalue())
+        to_be_enc_len = len(to_be_enc)
+        additional_len = 16 - to_be_enc_len % 16
+
+        byte_buffer.write(bytearray([additional_len] * additional_len))
+            
+        cipher = AES.new(key, AES.MODE_GCM, nonce=iv)
+        ciphertext, tag = cipher.encrypt_and_digest(bytes(byte_buffer.getvalue()))
+
+        byte_buffer_enc = io.BytesIO()
+        byte_buffer_enc.write(ciphertext)
+        byte_buffer_enc.write(tag)
+        
+        return bytes(byte_buffer_enc.getvalue())
+
+    def __request_password(self):
+        # Request password to encrypt private key
+        while True:
+            pass1 = self.__ui.get_password("Enter encryption password: ")
+            pass2 = self.__ui.get_password("Confirm encryption password: ")
+            if pass1 == pass2:
+                break
+            else:
+                self.__ui.print_message("Passwords are not same, try again please")
+        return pass1.encode('utf-8')
+
     def __export_for_yiot(self):
-        password = self.__ui.get_user_input("Encryption password: ", empty_allow=False).encode('utf-8')
+        password = self.__request_password()
         self.__ui.print_message("Exporting for YIoT application ...")
         shutil.rmtree(self.__yiot_app_storage_path, ignore_errors=True)
         self.__logger.debug("Creating {}".format(self.__yiot_app_storage_path))
@@ -863,23 +907,9 @@ class UtilityManager:
         byte_buffer.write(self.__long_to_bytes(len(content)))
         byte_buffer.write(content)
 
-        key = sha256(password).digest()
-        iv = sha256(key).digest()[:12]
-        to_be_enc = bytes(byte_buffer.getvalue())
-        to_be_enc_len = len(to_be_enc)
-        additional_len = 16 - to_be_enc_len % 16
-
-        byte_buffer.write(bytearray([additional_len] * additional_len))
-            
-        cipher = AES.new(key, AES.MODE_GCM, nonce=iv)
-        ciphertext, tag = cipher.encrypt_and_digest(bytes(byte_buffer.getvalue()))
-
-        byte_buffer_enc = io.BytesIO()
-        byte_buffer_enc.write(ciphertext)
-        byte_buffer_enc.write(tag)
-
         file_path = os.path.join(self.__yiot_app_storage_path, "yiot.rot")
-        open(file_path, "wb").write(bytes(byte_buffer_enc.getvalue()))
+        enc_data = self.__encrypt_with_password(bytes(byte_buffer.getvalue()), password)
+        open(file_path, "wb").write(enc_data)
 
         self.__ui.print_message("Export finished")
 
@@ -940,3 +970,130 @@ class UtilityManager:
         db_path = os.path.join(self.__key_storage_path, "db")
         if not os.path.exists(db_path):
             os.makedirs(db_path)
+
+    def __create_root_user(self):
+        pass
+
+    def __create_customer_cred(self):
+        pass
+
+    def __generate_license(self):
+        self.__logger.info("License generation started")
+
+        # Enter comment
+        license_owner = self.__ui.get_user_input("Enter License Owner: ")
+
+        self.__ui.print_message("\nGenerating Key ...")
+
+        key_type = consts.VSKeyTypeS.LICENSE
+
+        private_keys_db, public_keys_db = self.__keys_type_to_storage_map[key_type]
+
+        # Prepare generator
+        key = self.key_chooser(
+            key_type, stage="License Key generation", is_new_key=True, suppress_db_warning=False
+        )
+        if not key:
+            return
+
+        # Get Factory key to sign
+        key_for_sign = self.key_chooser(
+            consts.VSKeyTypeS.FACTORY,
+            stage="License Key generation, Factory key for signing selection",
+            greeting_msg="Please choose Recovery Key for signing: ",
+            suppress_db_warning=False
+            )
+        if not key_for_sign:
+            return
+
+        # Instances limit
+        instances_limit = self.__ui.get_user_input(
+            "Enter the Instances limit number from 1 to 4096: ",
+            input_checker_callback=self.__ui.InputCheckers.signature_input_check,
+            input_checker_msg="Only the number in range from 1 to 4096 is allowed. Please try again: ",
+            empty_allow=False
+            )
+        instances_limit = int(instances_limit)
+
+        # Get start/expiration date
+        start_date, expiration_date = self.__choose_dates_for_key(necessary=True)
+
+        # Generate
+        if not key.generate(
+                signature_limit=instances_limit,
+                signer_key=key_for_sign,
+                start_date=start_date,
+                expire_date=expiration_date
+        ):
+            self.__logger.info("License Key generation failed")
+            self.__ui.print_message("License Key generation failed")
+            return
+
+        # Save to db
+        # - prepare key info to be saved
+        key_info = {
+            "type": key_type.value,
+            "ec_type": key.ec_type_secmodule,
+            "start_date": start_date,
+            "expiration_date": expiration_date,
+            "comment": license_owner,
+            "key": key.public_key,
+            "meta_data": ""
+        }
+
+        key_info["signature"] = key.signature
+        key_info["signer_key_id"] = key_for_sign.key_id
+        key_info["signer_hash_type"] = key_for_sign.hash_type_secmodule
+
+        # - public
+        public_keys_db.save(key.key_id, key_info, suppress_db_warning=False)
+
+        # - private
+        key_info["key"] = key.private_key
+        if self._context.program_mode == ProgramModes.VIRGIL_CRYPTO_ONLY:
+            private_keys_db.save(key.key_id, key_info, suppress_db_warning=False)
+
+        # Request password to encrypt private key
+        password = self.__request_password()
+
+        # Save license
+        license_content = dict()
+        license_content["license_owner"] = license_owner
+        license_content["start_date"] = timestamp_to_str(start_date)
+        license_content["expiration_date"] = timestamp_to_str(expiration_date)
+        license_content["instances_limit"] = instances_limit
+
+        key_pair = dict()
+        key_pair["ec_type"] = key.ec_type_secmodule
+        key_pair["key_type"] = consts.key_type_str_to_num_map[key_type]
+
+        key_data = b64_to_bytes(key.private_key)
+        enc_key_data = self.__encrypt_with_password(key_data, password)
+        enc_key_data_b64 = to_b64(enc_key_data)
+
+        key_pair["encrypted_private"] = enc_key_data_b64
+        key_pair["public"] = key.public_key
+        license_content["key_pair"] = key_pair
+
+        signature = dict()
+        signature["data"] = key.signature
+        signature["signer_public_key"] = key_for_sign.public_key
+        signature["signer_hash_type"] = key_for_sign.hash_type_secmodule
+        license_content["signature"] = signature
+        json_object = json.dumps(license_content, indent = 4).encode('utf-8') 
+
+        self.__ui.print_message("Saving License ...")
+        license_path = os.path.join(self.__license_storage_path, license_owner)
+        os.makedirs(license_path, exist_ok=True)
+
+        now = datetime.now()
+        dt_str = license_owner + "-" + now.strftime("%m_%d_%Y-%H:%M:%S") + ".lic"
+        license_file = os.path.join(license_path, dt_str)
+        open(license_file, "wb").write(json_object)
+
+        # Finish
+        self.__ui.print_message("Generation finished")
+        self.__logger.info("License generation completed. id: [{id}] owner: [{owner}] ".format(
+            id=key.key_id,
+            owner=license_owner
+        ))

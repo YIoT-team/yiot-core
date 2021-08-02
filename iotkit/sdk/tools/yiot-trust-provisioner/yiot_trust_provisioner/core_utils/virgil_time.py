@@ -20,3 +20,7 @@ def timestamp_to_date(ts: int) -> (int, int, int):
     timestamp = TIME_OFFSET + ts
     dt = datetime.utcfromtimestamp(timestamp)
     return dt.year, dt.month, dt.day
+
+def timestamp_to_str(ts: int) -> str:
+    y, m, d = timestamp_to_date(ts)
+    return str(y) + "-" + str(m) + "-" + str(d)

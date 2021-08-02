@@ -38,6 +38,7 @@ class VSKeyTypeE(IntEnum):
     FIRMWARE_INTERNAL = 7
     AUTH_INTERNAL = 8
     CLOUD = 9
+    LICENSE = 10
 
 
 class VSKeyTypeS(Enum):
@@ -51,6 +52,7 @@ class VSKeyTypeS(Enum):
     FIRMWARE_INTERNAL = "firmware_internal"
     AUTH_INTERNAL = "auth_internal"
     CLOUD = "cloud"
+    LICENSE = "license"
 
 
 hash_type_vs_to_secmodule_map = {
@@ -82,7 +84,8 @@ key_type_str_to_num_map = {
     VSKeyTypeS.USER_DEVICE:       VSKeyTypeE.USER_DEVICE,
     VSKeyTypeS.FIRMWARE_INTERNAL: VSKeyTypeE.FIRMWARE_INTERNAL,
     VSKeyTypeS.AUTH_INTERNAL:     VSKeyTypeE.AUTH_INTERNAL,
-    VSKeyTypeS.CLOUD:             VSKeyTypeE.CLOUD
+    VSKeyTypeS.CLOUD:             VSKeyTypeE.CLOUD,
+    VSKeyTypeS.LICENSE:           VSKeyTypeE.LICENSE
 }
 
 signature_sizes = {

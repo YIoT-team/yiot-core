@@ -1,6 +1,6 @@
 import base64
 import binascii
-
+from getpass import getpass
 
 class UI:
 
@@ -132,6 +132,15 @@ class UI:
                         self.__logger.warning(input_checker_msg)
                 return self.get_user_input(input_prompt, input_checker_callback, input_checker_msg, empty_allow)
         return user_input
+
+    def get_password(self, input_prompt):
+        password = getpass(prompt=input_prompt)
+        if not password:
+            self.print_message("Empty password is not allowed! Please try again!")
+            if self.__logger:
+                self.__logger.warning("empty password entered!")
+            return self.get_password(input_prompt)
+        return password
 
     def get_date(self):
         while True:
