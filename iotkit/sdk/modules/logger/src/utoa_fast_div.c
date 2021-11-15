@@ -34,7 +34,6 @@
 
 // (c) http://we.easyelectronics.ru/Soft/preobrazuem-v-stroku-chast-1-celye-chisla.html
 
-#include <stdint.h>
 #include <stdlib-config.h>
 
 /******************************************************************************/
@@ -82,3 +81,5 @@ utoa_fast_div(uint32_t value, char *buffer) {
     } while (value != 0);
     return buffer;
 }
+
+/******************************************************************************/
