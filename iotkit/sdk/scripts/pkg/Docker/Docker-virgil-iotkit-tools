@@ -22,5 +22,6 @@ ADD python3-virgil-sdk-*.el8.noarch.rpm    /tmp
 ADD yiot-iotkit-tools-*.el8.x86_64.rpm   /tmp
 
 RUN yum -y install /tmp/*.rpm && rm -rf /tmp/*
+RUN /usr/libexec/platform-python -m pip install pycryptodomex
 
 

@@ -38,6 +38,12 @@ create_dir() {
 }
 
 #######################################################################################################################
+clean_mock() {
+   sudo mock -r ${BUILD_OS_DISTR} --init
+}
+
+
+#######################################################################################################################
 build_rpm() {
    
    local PARAM_PACKAGE="${1}"
@@ -57,10 +63,10 @@ build_rpm() {
 
 #######################################################################################################################
 create_dir
+clean_mock
 build_rpm python-PyCRC
 build_rpm python-tinydb
 build_rpm python-virgil-crypto_v3
 build_rpm python-virgil-sdk
 build_rpm yiot-iotkit-tools
-
 

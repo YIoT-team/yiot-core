@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 SCRIPT_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 IOTKIT_PROJECT_PATH="${SCRIPT_PATH}/../../../../"
 source ${SCRIPT_PATH}/inc/options.sh
@@ -65,29 +67,29 @@ get_sources() {
    echo "####################"   
    echo "# Download cache"
    echo "####################"      
-   cmake3  -Bbuild -H.
+   cmake3  -Bbuild -H. -DVIRGIL_IOT_CONFIG_DIRECTORY="$(pwd)/config/pc"
    rm -rf build
    mkdir -p build
    check_error
    
-   git clone https://github.com/gorilla/websocket.git                                   build/demo/nix/iotkit/go/src/github.com/gorilla/websocket
+   git clone https://github.com/gorilla/websocket.git                                   build/go/src/github.com/gorilla/websocket
    check_error
-   git clone https://github.com/pkg/errors                                              build/demo/nix/iotkit/go/src/github.com/pkg/errors   
+   git clone https://github.com/pkg/errors                                              build/go/src/github.com/pkg/errors   
    check_error
-   git clone https://gopkg.in/urfave/cli.v2                                             build/demo/nix/iotkit/go/src/gopkg.in/urfave/cli.v2
+   git clone https://gopkg.in/urfave/cli.v2                                             build/go/src/gopkg.in/urfave/cli.v2
    check_error
-   git clone https://gopkg.in/virgil.v5                                                 build/demo/nix/iotkit/go/src/gopkg.in/virgil.v5   
+   git clone https://gopkg.in/virgil.v5                                                 build/go/src/gopkg.in/virgil.v5   
    check_error
-   git clone --branch=v2.0.0 https://github.com/cpuguy83/go-md2man                      build/demo/nix/iotkit/go/src/github.com/cpuguy83/go-md2man
+   git clone --branch=v2.0.0 https://github.com/cpuguy83/go-md2man                      build/go/src/github.com/cpuguy83/go-md2man
    check_error
-   mkdir -p  build/demo/nix/iotkit/go/src/github.com/cpuguy83/go-md2man/v2/
-   ln -s ../md2man  build/demo/nix/iotkit/go/src/github.com/cpuguy83/go-md2man/v2/md2man
-   git clone https://gopkg.in/virgilsecurity/virgil-crypto-go.v5                        build/demo/nix/iotkit/go/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5
+   mkdir -p  build/go/src/github.com/cpuguy83/go-md2man/v2/
+   ln -s ../md2man  build/go/src/github.com/cpuguy83/go-md2man/v2/md2man
+   git clone https://gopkg.in/virgilsecurity/virgil-crypto-go.v5                        build/go/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5
    check_error
-   git clone --branch=master https://github.com/VirgilSecurity/virgil-crypto.git        build/demo/nix/iotkit/go/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/ext/virgil-crypto
+   git clone --branch=master https://github.com/VirgilSecurity/virgil-crypto.git        build/go/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/ext/virgil-crypto
    check_error
-   rm -f build/demo/nix/iotkit/go/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/Makefile
-   pushd build/demo/nix/iotkit/go/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/ext/virgil-crypto
+   rm -f build/go/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/Makefile
+   pushd build/go/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/ext/virgil-crypto
      cmake -H. -B_build -DCMAKE_INSTALL_PREFIX=../../ -DLANG=go -DINSTALL_CORE_LIBS=ON; rm -rf _build
    popd
 

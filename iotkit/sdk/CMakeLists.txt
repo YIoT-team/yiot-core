@@ -123,7 +123,7 @@ message(STATUS "[VIRGIL_IOT_SDK_HAL_INC_PATH] Additional paths to HAL : ${VIRGIL
 #
 # Test
 #
-option(ENABLE_TESTING "On/Off integration tests." ON)
+option(ENABLE_TESTING "On/Off integration tests." OFF)
 option(ENABLE_HEAVY_TESTS "On/Off execution of heavy tests." OFF)
 
 #
@@ -186,9 +186,9 @@ endif()
 #
 #   Tests
 #
-if (NOT MOBILE_PLATFORM AND NOT YIOT_OPENWRT)
-    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
-endif()
+# if (NOT MOBILE_PLATFORM AND NOT YIOT_OPENWRT)
+#    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/tests)
+#endif()
 
 #
 #   Documentation
