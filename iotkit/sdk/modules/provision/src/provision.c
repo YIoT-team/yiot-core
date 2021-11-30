@@ -325,6 +325,9 @@ vs_provision_init(vs_storage_op_ctx_t *tl_storage_ctx,
 /******************************************************************************/
 vs_status_e
 vs_provision_update(void) {
+    if (_events_cb.update_cb) {
+        _events_cb.update_cb();
+    }
     return vs_provision_init(_tl_storage_ctx,
                              _secmodule,
                              _events_cb);

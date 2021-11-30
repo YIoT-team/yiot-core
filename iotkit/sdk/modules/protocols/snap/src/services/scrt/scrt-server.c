@@ -52,7 +52,7 @@
 #include <endian-config.h>
 
 static vs_secmodule_impl_t *_secmodule = NULL;
-static vs_snap_scrt_server_service_t _impl = {};
+static vs_snap_scrt_server_service_t _impl = {NULL};
 static bool _scrt_service_ready = false;
 
 /******************************************************************/
@@ -248,6 +248,10 @@ _scrt_add_user_request_processor(const uint8_t *request,
                                   (vs_pubkey_dated_t *)new_user_cert->raw_cert),
                      "Cannot add a new user");
 
+    if (_impl.users_update_cb) {
+        _impl.users_update_cb();
+    }
+
     return VS_CODE_OK;
 }
 
@@ -294,6 +298,10 @@ _scrt_remove_user_request_processor(const uint8_t *request,
     STATUS_CHECK_RET(vs_users_remove_by_name((vs_user_type_t)remove_user_info->user_type,
                                              (const char *)remove_user_info->rm_user_name),
                      "Cannot remove user");
+
+    if (_impl.users_update_cb) {
+        _impl.users_update_cb();
+    }
 
     return VS_CODE_OK;
 }
@@ -415,6 +423,8 @@ vs_snap_scrt_server(vs_secmodule_impl_t *secmodule, vs_snap_scrt_server_service_
     static vs_snap_service_t _scrt;
 
     CHECK_NOT_ZERO_RET(secmodule, NULL);
+
+    _impl = impl;
 
     if (!_scrt_service_ready) {
         _scrt_service_ready = true;
