@@ -210,12 +210,15 @@ typedef struct {
  */
 typedef void (*vs_file_ver_info_cb_t)(vs_file_version_t ver);
 
+typedef void (*vs_provision_update_cb_t)(void);
+
 /** Container of pointers to callback functions for Provision Events
  *
  * Fill required callbacks to receive information about different events of Provision module
  */
 typedef struct {
     vs_file_ver_info_cb_t tl_ver_info_cb;
+    vs_provision_update_cb_t update_cb;
 } vs_provision_events_t;
 
 #ifdef __cplusplus
