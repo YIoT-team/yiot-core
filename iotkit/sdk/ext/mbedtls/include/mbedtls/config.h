@@ -118,7 +118,7 @@ extern void yiot_uboot_exit(int);
 #define MBEDTLS_CTR_DRBG_C
 #define MBEDTLS_DHM_C
 #define MBEDTLS_ECDH_C
-// #define MBEDTLS_ECDSA_C
+#define MBEDTLS_ECDSA_C
 #define MBEDTLS_ECP_C
 // #define MBEDTLS_ENTROPY_C
 #define MBEDTLS_ERROR_C
