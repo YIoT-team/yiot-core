@@ -42,6 +42,8 @@
 #ifndef VS_IOT_SDK_LOGGER_CONFIG_H
 #define VS_IOT_SDK_LOGGER_CONFIG_H
 
+#include <stdbool.h>
+
 /** Enable logger
  *
  * Enables logger library.
