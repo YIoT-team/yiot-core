@@ -426,7 +426,7 @@ func (p *DeviceProcessor) SignDevice() error {
     if err != nil {
         return err
     }
-    fmt.Println("Device public key (virgil):", base64.StdEncoding.EncodeToString(pubKeyFull))
+    fmt.Println("Device public key (ASN.1):", base64.StdEncoding.EncodeToString(pubKeyFull))
 
     // - verify
     if p.DeviceSigner.Verify(dataToSign, virgilSignature, pubKeyFull, virgilHashType) != nil {

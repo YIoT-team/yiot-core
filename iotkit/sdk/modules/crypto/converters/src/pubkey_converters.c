@@ -244,5 +244,4 @@ vs_converters_pubkey_to_virgil(vs_secmodule_keypair_type_e keypair_type,
 
     return _keypair_ec_key_to_internal(
             keypair_type, public_key_in, public_key_in_sz, public_key_out, buf_sz, public_key_out_sz);
-
 }

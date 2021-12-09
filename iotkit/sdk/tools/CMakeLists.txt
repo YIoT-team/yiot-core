@@ -41,9 +41,9 @@ include(installVirgilCryptoGo.cmake)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/c-implementation)
 
 #
-#   Factory initalizer
+#   Factory tool
 #
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/virgil-device-initializer)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/yiot-device-initializer)
 
 #
 #   Registrar

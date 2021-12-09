@@ -78,7 +78,7 @@ $ git clone --recursive https://github.com/VirgilSecurity/virgil-iot-sdk.git
 $ cd virgil-iot-sdk
 $ mkdir build && cd build
 $ cmake ..
-$ make vs-tool-virgil-device-initializer
+$ make vs-tool-yiot-device-initializer
 ```
 
 #### Windows OS
@@ -91,7 +91,7 @@ Here is the list of the commands for Virgil Device Initializer:
 The CLI has the following syntax:
 
 ```bash
-virgil-device-initializer
+yiot-device-initializer
 --output "/root/current-credentials/card_requests_gateways.txt"
 --device_info_output "/root/current-credentials/device_info.txt"
 --auth_pub_key_1 "/root/current-credentials/key_storage/pubkeys/auth_15918_auth2.pub"
@@ -124,7 +124,7 @@ The result of the command execution is the following:
 Here is an example of a device being initialized:
 
 ```bash
-Run:virgil-device-initializer --output "/root/current-credentials/card_requests_gateways.txt" --device_info_output "/root/current-credentials/device_info.txt" --auth_pub_key_1 "/root/current-credentials/key_storage/pubkeys/auth_15918_auth2.pub" --auth_pub_key_2 "/root/current-credentials/key_storage/pubkeys/auth_54929_auth1.pub" --rec_pub_key_1 "/root/current-credentials/key_storage/pubkeys/recovery_10514_recovery1.pub" --rec_pub_key_2 "/root/current-credentials/key_storage/pubkeys/recovery_8644_recovery2.pub" --tl_pub_key_1 "/root/current-credentials/key_storage/pubkeys/tl_23138_tl2.pub" --tl_pub_key_2 "/root/current-credentials/key_storage/pubkeys/tl_41287_tl1.pub" --fw_pub_key_1 "/root/current-credentials/key_storage/pubkeys/firmware_57637_firmware1.pub" --fw_pub_key_2 "/root/current-credentials/key_storage/pubkeys/firmware_62881_firmware2.pub" --trust_list "/root/current-credentials/key_storage/trust_lists/release/TrustList_16568.tl" --factory_key "/root/current-credentials/key_storage/private/factory_24251_factory.key"
+Run:yiot-device-initializer --output "/root/current-credentials/card_requests_gateways.txt" --device_info_output "/root/current-credentials/device_info.txt" --auth_pub_key_1 "/root/current-credentials/key_storage/pubkeys/auth_15918_auth2.pub" --auth_pub_key_2 "/root/current-credentials/key_storage/pubkeys/auth_54929_auth1.pub" --rec_pub_key_1 "/root/current-credentials/key_storage/pubkeys/recovery_10514_recovery1.pub" --rec_pub_key_2 "/root/current-credentials/key_storage/pubkeys/recovery_8644_recovery2.pub" --tl_pub_key_1 "/root/current-credentials/key_storage/pubkeys/tl_23138_tl2.pub" --tl_pub_key_2 "/root/current-credentials/key_storage/pubkeys/tl_41287_tl1.pub" --fw_pub_key_1 "/root/current-credentials/key_storage/pubkeys/firmware_57637_firmware1.pub" --fw_pub_key_2 "/root/current-credentials/key_storage/pubkeys/firmware_62881_firmware2.pub" --trust_list "/root/current-credentials/key_storage/trust_lists/release/TrustList_16568.tl" --factory_key "/root/current-credentials/key_storage/private/factory_24251_factory.key"
 Got 1 device
 Device roles: [GATEWAY]
 Device MAC: 25:f4:69:0c:99:5a
