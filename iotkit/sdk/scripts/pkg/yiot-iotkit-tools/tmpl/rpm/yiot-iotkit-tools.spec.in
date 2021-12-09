@@ -50,6 +50,7 @@ YIoT Security IOT SDK
 %setup -q -n %{name}-%{version}
 
 %build
+export GO111MODULE=off
 export GOPATH=$(pwd)/build/go
 export GOOS=linux
 %ifarch %{arm}
