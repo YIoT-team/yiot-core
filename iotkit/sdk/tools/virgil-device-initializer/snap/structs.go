@@ -38,6 +38,7 @@ import (
     "bytes"
     "encoding/binary"
     "fmt"
+    "encoding/hex"
 
     "../common"
 )
@@ -49,7 +50,7 @@ type Go_vs_snap_prvs_devi_t struct {
     Serial       [32]uint8
     DataSz       uint16
 
-    PubKey       common.Go_vs_pubkey_t
+    PubKeyDated  common.Go_vs_pubkey_dated_t
     Signature    common.Go_vs_sign_t
 }
 
@@ -71,16 +72,22 @@ func (g *Go_vs_snap_prvs_devi_t) FromBytes(b []byte) error {
         return fmt.Errorf("failed to deserialize vs_snap_prvs_devi_t DataSz: %v", err)
     }
 
-    // Rest of buffer holds vs_pubkey_t + vs_sign_t
+    // Rest of buffer holds vs_pubkey_dated_t + vs_sign_t
     data := buf.Bytes()
 
     // Public key
-    publicKey := common.Go_vs_pubkey_t{}
+
+    str := hex.EncodeToString(data)
+
+    fmt.Println(str)
+
+    publicKey := common.Go_vs_pubkey_dated_t{}
     signatureOffset, err := publicKey.FromBytes(data)
+
     if err != nil {
         return err
     }
-    g.PubKey = publicKey
+    g.PubKeyDated = publicKey
 
     // Signature
     signature := common.Go_vs_sign_t{}

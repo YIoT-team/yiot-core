@@ -35,16 +35,16 @@
 package request
 
 import (
-    "encoding/hex"
+//     "encoding/hex"
     "encoding/json"
     "fmt"
-    "time"
+//     "time"
 
     "../common"
-    "../converters"
+//     "../converters"
     "../snap"
 
-    "gopkg.in/virgil.v5/sdk"
+//     "gopkg.in/virgil.v5/sdk"
 )
 
 type Builder struct {
@@ -72,62 +72,62 @@ type CardSnapshotJson struct {
     *DeviceInfoJson
 }
 
-func (b Builder) BuildRequest() (string, error) {
-    var err error
-
-    identity := hex.EncodeToString(b.DeviceProcessor.Serial[:])
-
-    // Convert raw public key to Virgil format
-    var virgilPubKey []byte
-    virgilPubKey, err = converters.RawPubKeyToVirgil(b.DeviceProcessor.DevicePublicKey.RawPubKey,
-                                                     b.DeviceProcessor.DevicePublicKey.ECType)
-    if err != nil {
-        return "", err
-    }
-
-    // Prepare card content snapshot
-    cardContent := sdk.RawCardContent{
-        Identity:       identity,
-        PublicKey:      virgilPubKey,
-        CreatedAt:      time.Now().UTC().Unix(),
-        Version:        sdk.CardVersion,
-    }
-    cardContentSnapshot, err := sdk.TakeSnapshot(cardContent)
-    if err != nil {
-        return "", fmt.Errorf("failed to take content snapshot: %v", err)
-    }
-
-    // Create card
-    rawCard := sdk.RawSignedModel{
-        ContentSnapshot: cardContentSnapshot,
-    }
-
-    // Sign combined snapshot inside device
-    extraContent, err := b.GetCardSnapshot()
-    if err != nil {
-        return "", fmt.Errorf("failed to get device info: %v", err)
-    }
-    combinedSnapshot := append(rawCard.ContentSnapshot, extraContent...)
-    signature, err := b.Signer.Sign(combinedSnapshot)
-    if err != nil {
-        return "", err
-    }
-    rawSignature := sdk.RawCardSignature{
-        Signer:    "self",
-        Signature: signature,
-        Snapshot:  extraContent,
-    }
-
-    // Append signature to card
-    rawCard.Signatures = append(rawCard.Signatures, &rawSignature)
-
-    // Export card as base64
-    rawCardBase64, err := rawCard.ExportAsBase64EncodedString()
-    if err != nil {
-        return "", fmt.Errorf("failed to export card as base64: %v", err)
-    }
-    return rawCardBase64, nil
-}
+// func (b Builder) BuildRequest() (string, error) {
+//     var err error
+//
+//     identity := hex.EncodeToString(b.DeviceProcessor.Serial[:])
+//
+//     // Convert raw public key to Virgil format
+//     var virgilPubKey []byte
+//     virgilPubKey, err = converters.RawPubKeyToVirgil(b.DeviceProcessor.DevicePublicKey.PubKey.RawPubKey,
+//                                                      b.DeviceProcessor.DevicePublicKey.PubKey.ECType)
+//     if err != nil {
+//         return "", err
+//     }
+//
+//     // Prepare card content snapshot
+//     cardContent := sdk.RawCardContent{
+//         Identity:       identity,
+//         PublicKey:      virgilPubKey,
+//         CreatedAt:      time.Now().UTC().Unix(),
+//         Version:        sdk.CardVersion,
+//     }
+//     cardContentSnapshot, err := sdk.TakeSnapshot(cardContent)
+//     if err != nil {
+//         return "", fmt.Errorf("failed to take content snapshot: %v", err)
+//     }
+//
+//     // Create card
+//     rawCard := sdk.RawSignedModel{
+//         ContentSnapshot: cardContentSnapshot,
+//     }
+//
+//     // Sign combined snapshot inside device
+//     extraContent, err := b.GetCardSnapshot()
+//     if err != nil {
+//         return "", fmt.Errorf("failed to get device info: %v", err)
+//     }
+//     combinedSnapshot := append(rawCard.ContentSnapshot, extraContent...)
+//     signature, err := b.Signer.Sign(combinedSnapshot)
+//     if err != nil {
+//         return "", err
+//     }
+//     rawSignature := sdk.RawCardSignature{
+//         Signer:    "self",
+//         Signature: signature,
+//         Snapshot:  extraContent,
+//     }
+//
+//     // Append signature to card
+//     rawCard.Signatures = append(rawCard.Signatures, &rawSignature)
+//
+//     // Export card as base64
+//     rawCardBase64, err := rawCard.ExportAsBase64EncodedString()
+//     if err != nil {
+//         return "", fmt.Errorf("failed to export card as base64: %v", err)
+//     }
+//     return rawCardBase64, nil
+// }
 
 func (b *Builder) GetDeviceInfo() ([]byte, error) {
     mac := b.DeviceProcessor.DeviceMacAddr
@@ -136,10 +136,10 @@ func (b *Builder) GetDeviceInfo() ([]byte, error) {
         Model:           fmt.Sprintf("%#x", b.DeviceProcessor.Model),
         Mac:             fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]),
         Serial:          b.DeviceProcessor.Serial[:],
-        PublicKeyTiny:   b.DeviceProcessor.DevicePublicKey.RawPubKey,
+        PublicKeyTiny:   b.DeviceProcessor.DevicePublicKey.PubKey.RawPubKey,
         Signature:       b.DeviceProcessor.Signature.RawSignature,
-        KeyType:         b.DeviceProcessor.DevicePublicKey.KeyType,
-        ECType:          b.DeviceProcessor.DevicePublicKey.ECType,
+        KeyType:         b.DeviceProcessor.DevicePublicKey.PubKey.KeyType,
+        ECType:          b.DeviceProcessor.DevicePublicKey.PubKey.ECType,
         Roles:           b.DeviceProcessor.Roles,
     }
     b.deviceInfo = info

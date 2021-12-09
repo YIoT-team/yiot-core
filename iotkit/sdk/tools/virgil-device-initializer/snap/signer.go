@@ -54,7 +54,7 @@ func (s *Signer) Sign(data []byte) ([]byte, error) {
 
     // Convert signature to Virgil format
     var virgilSignature []byte
-    virgilSignature, err = converters.RawSignToVirgil(rawSignature, s.Processor.DevicePublicKey.ECType, DEVICE_HASH_ALGO)
+    virgilSignature, err = converters.RawSignToVirgil(rawSignature, s.Processor.DevicePublicKey.PubKey.ECType, DEVICE_HASH_ALGO)
     if err != nil {
         return nil, err
     }

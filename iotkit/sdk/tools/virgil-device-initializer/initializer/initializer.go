@@ -142,9 +142,9 @@ func (initializer *FactoryInitializer) InitializeDevices() error {
         FileName:             initializer.DeviceInfoFile,
     }
 
-    requestsPersistenceManager := PersistenceManager{
-        FileName:             initializer.OutputFile,
-    }
+//     requestsPersistenceManager := PersistenceManager{
+//         FileName:             initializer.OutputFile,
+//     }
 
     // Prepare device signer
     deviceSigner := &common.VirgilCryptoSigner{
@@ -193,14 +193,14 @@ func (initializer *FactoryInitializer) InitializeDevices() error {
             }
 
             // Save card request
-            cardRequest, err := requestBuilder.BuildRequest()
-            if err != nil {
-                return err
-            }
-            fmt.Println("Card request:", cardRequest)
-            if err := requestsPersistenceManager.Persist(cardRequest); err != nil {
-                return err
-            }
+//             cardRequest, err := requestBuilder.BuildRequest()
+//             if err != nil {
+//                 return err
+//             }
+//             fmt.Println("Card request:", cardRequest)
+//             if err := requestsPersistenceManager.Persist(cardRequest); err != nil {
+//                 return err
+//             }
         }
     }
 

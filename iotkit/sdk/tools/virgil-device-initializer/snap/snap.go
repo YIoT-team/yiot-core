@@ -35,11 +35,16 @@
 package snap
 
 /*
-#cgo LDFLAGS: -lvs-module-snap-factory -ltools-hal -lvs-module-logger
+#cgo LDFLAGS: -lvs-module-snap-factory -ltools-hal -lvs-module-logger -lvs-module-crypto-session
 #include <virgil/iot/protocols/snap.h>
 #include <virgil/iot/protocols/snap/prvs/prvs-client.h>
 #include <virgil/iot/tools/hal/ti_netif_udp_bcast.h>
 #include <virgil/iot/tools/hal/snap/ti_prvs_impl.h>
+
+bool
+go_need_enc_cb(vs_snap_service_id_t service_id, vs_snap_element_t element_id) {
+    return false;
+}
 
 int
 go_snap_init(void) {
@@ -51,7 +56,7 @@ go_snap_init(void) {
     // Initialize Logger module
     vs_logger_init(VS_LOGLEV_DEBUG);
 
-    return vs_snap_init(vs_hal_netif_udp_bcast(), NULL, manufacture_id, device_type, serial, roles);
+    return vs_snap_init(vs_hal_netif_udp_bcast(), NULL, go_need_enc_cb, NULL, manufacture_id, device_type, serial, roles);
 }
 
 */
@@ -96,7 +101,7 @@ type DeviceProcessor struct {
     Manufacturer           [16]uint8
     Model                  [4]uint8
     Roles                  []string
-    DevicePublicKey        common.Go_vs_pubkey_t
+    DevicePublicKey        common.Go_vs_pubkey_dated_t
     Signature              common.Go_vs_sign_t
 }
 
@@ -149,11 +154,11 @@ func (p *Processor) NewDeviceProcessor(i int, deviceSigner common.SignerInterfac
         deviceInfo:       p.devicesList.elements[i],
         Roles:            deviceRoles,
     }
+
     return &processor
 }
 
 func (p *DeviceProcessor) Process() error {
-
     if p.ProvisioningInfo.TlOnly {
         if err := p.SetTrustList(); err != nil {
             return err
@@ -163,6 +168,7 @@ func (p *DeviceProcessor) Process() error {
             if err := p.InitDevice(); err != nil {
                 return err
             }
+
             if err := p.SetKeys(); err != nil {
                 return err
             }
@@ -296,7 +302,7 @@ func (p *DeviceProcessor) InitDevice() error {
         return fmt.Errorf("InitDevice: vs_snap_prvs_save_provision error")
     }
 
-    pubKeyT := common.Go_vs_pubkey_t{}
+    pubKeyT := common.Go_vs_pubkey_dated_t{}
     if _, err := pubKeyT.FromBytes(asavInfoBuf[:]); err != nil {
         return err
     }
@@ -409,9 +415,9 @@ func (p *DeviceProcessor) SignDevice() error {
         RawPubKey:    rawPubKey,
     }
 
-    fmt.Println("Device key type", p.DevicePublicKey.KeyType)
-    fmt.Println("Device key EC type", p.DevicePublicKey.ECType)
-    fmt.Println("Device public key (raw):", base64.StdEncoding.EncodeToString(p.DevicePublicKey.RawPubKey))
+    fmt.Println("Device key type", p.DevicePublicKey.PubKey.KeyType)
+    fmt.Println("Device key EC type", p.DevicePublicKey.PubKey.ECType)
+    fmt.Println("Device public key (raw):", base64.StdEncoding.EncodeToString(p.DevicePublicKey.PubKey.RawPubKey))
     fmt.Println("Signature (raw):", base64.StdEncoding.EncodeToString(rawSignature))
 
     // Verify prepared signature
@@ -450,7 +456,7 @@ func (p *DeviceProcessor) GetProvisionInfo() error {
                                        &mac,
                                        deviceInfoPtr,
                                        C.uint16_t(bufSize),
-                                       DEFAULT_TIMEOUT_MS) {
+                                       DEFAULT_TIMEOUT_MS * 3) {
         return fmt.Errorf("failed to get device info (vs_snap_prvs_device_info)")
     }
 
@@ -460,7 +466,7 @@ func (p *DeviceProcessor) GetProvisionInfo() error {
         return err
     }
 
-    p.DevicePublicKey = deviceInfo.PubKey
+    p.DevicePublicKey = deviceInfo.PubKeyDated
     p.Signature = deviceInfo.Signature
     p.Serial = deviceInfo.Serial
     p.DeviceMacAddr = deviceInfo.MacAddress

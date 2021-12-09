@@ -55,6 +55,7 @@ set(CMAKE_CGO_CFLAGS
         -I${VIRGIL_IOT_DIRECTORY}/modules/protocols/snap/include
         -I${VIRGIL_IOT_DIRECTORY}/modules/provision/include
         -I${VIRGIL_IOT_DIRECTORY}/modules/crypto/converters/include
+        -I${VIRGIL_IOT_DIRECTORY}/modules/crypto/high-level/include
         -I${VIRGIL_IOT_DIRECTORY}/helpers/status_code/include
         -I${VIRGIL_IOT_DIRECTORY}/helpers/macros/include
         -I${VIRGIL_IOT_DIRECTORY}/modules/logger/include
@@ -72,6 +73,7 @@ set(CMAKE_CGO_LDFLAGS
         -L${VIRGIL_IOT_BINARY_DIRECTORY}/modules/protocols/snap
         -L${VIRGIL_IOT_BINARY_DIRECTORY}/tools/c-implementation
         -L${VIRGIL_IOT_BINARY_DIRECTORY}/modules/crypto/converters
+        -L${VIRGIL_IOT_BINARY_DIRECTORY}/modules/crypto/session
         -L${VIRGIL_IOT_BINARY_DIRECTORY}/modules/logger
         -Wl,-rpath -Wl,${VIRGIL_IOT_BINARY_DIRECTORY}/modules/crypto/converters
         )
