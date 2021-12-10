@@ -64,7 +64,7 @@ popd
 
 cmake3 -DVIRGIL_IOT_CONFIG_DIRECTORY=$(pwd)/config/pc -DTHING_MANUFACTURE=VIRGIL -DTHING_MODEL=MCU1 -Bbuild -DGO_ENABLE=ON -H.
 make -C build vs-tool-yiot-firmware-signer %{?_smp_mflags}
-make -C build vs-tool-virgil-device-initializer %{?_smp_mflags}
+make -C build vs-tool-yiot-device-initializer %{?_smp_mflags}
 
 %install
 pushd tools/yiot-trust-provisioner
@@ -81,6 +81,7 @@ install -d                                                                      
 install -p -m 644 tools/yiot-trust-provisioner/samples/provisioner.conf                        	                 %{buildroot}%{_sysconfdir}/yiot-trust-provisioner/
 install -p -m 755 build/modules/crypto/converters/libconverters.so                                               %{buildroot}%{_libdir}/
 install -p -m 755 build/tools/yiot-firmware-signer/yiot-firmware-signer                                          %{buildroot}%{_bindir}/
+install -p -m 755 build/tools/yiot-device-initializer/yiot-device-initializer                                    %{buildroot}%{_bindir}/
 
 %files
 %doc VERSION
@@ -89,6 +90,7 @@ install -p -m 755 build/tools/yiot-firmware-signer/yiot-firmware-signer         
 %{python3_sitelib}/%{key_manager_name}-%{key_manager_vers}-py3.*.egg-info
 %{_bindir}/yiot-trust-provisioner
 %{_bindir}/yiot-firmware-signer        
+%{_bindir}/yiot-device-initializer
 %{_libdir}/*
 
 %changelog
