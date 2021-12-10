@@ -109,13 +109,16 @@ _prvs_service_response_processor(const struct vs_netif_t *netif,
         }
         if (response_sz && response_sz < PRVS_BUF_SZ) {
             _last_data_sz = response_sz;
-            VS_IOT_MEMCPY(_last_data, response, response_sz);
+            uint16_t i;
+            for (i = 0; i < response_sz; i++) {
+                _last_data[i] = response[i];
+            }
 #if 0
             VS_LOG_HEX(VS_LOGLEV_DEBUG, "RCV: ", response, response_sz);
 #endif
         }
 
-        _prvs_impl.stop_wait_func(&_last_res, is_ack ? VS_CODE_OK : VS_CODE_ERR_PRVS_UNKNOWN);
+        _prvs_impl.stop_wait_func((int *)&_last_res, is_ack ? VS_CODE_OK : VS_CODE_ERR_PRVS_UNKNOWN);
 
         return VS_CODE_OK;
     }
@@ -212,7 +215,7 @@ vs_snap_prvs_set(const vs_netif_t *netif,
                          "Send request error");
 
         // Wait request
-        _prvs_impl.wait_func(wait_ms, &_last_res, VS_CODE_ERR_PRVS_UNKNOWN);
+        _prvs_impl.wait_func(wait_ms, (int *)&_last_res, VS_CODE_ERR_PRVS_UNKNOWN);
 
         if (VS_CODE_OK == _last_res) {
             break;
@@ -244,11 +247,11 @@ vs_snap_prvs_get(const vs_netif_t *netif,
         STATUS_CHECK_RET(vs_snap_send_request(netif, mac, VS_PRVS_SERVICE_ID, element, 0, 0), "Send request error");
 
         // Wait request
-        _prvs_impl.wait_func(wait_ms, &_last_res, VS_CODE_ERR_PRVS_UNKNOWN);
+        _prvs_impl.wait_func(wait_ms, (int *)&_last_res, VS_CODE_ERR_PRVS_UNKNOWN);
 
         // Pass data
         if (VS_CODE_OK == _last_res && _last_data_sz <= buf_sz) {
-            VS_IOT_MEMCPY(data, _last_data, _last_data_sz);
+            VS_IOT_MEMCPY(data, (void *)_last_data, _last_data_sz);
             *data_sz = _last_data_sz;
             return VS_CODE_OK;
         }
@@ -294,11 +297,11 @@ vs_snap_prvs_sign_data(const vs_netif_t *netif,
                          "Send request error");
 
         // Wait request
-        _prvs_impl.wait_func(wait_ms, &_last_res, VS_CODE_ERR_PRVS_UNKNOWN);
+        _prvs_impl.wait_func(wait_ms, (int *)&_last_res, VS_CODE_ERR_PRVS_UNKNOWN);
 
         // Pass data
         if (VS_CODE_OK == _last_res && _last_data_sz <= buf_sz) {
-            VS_IOT_MEMCPY(signature, _last_data, _last_data_sz);
+            VS_IOT_MEMCPY(signature, (void *)_last_data, _last_data_sz);
             *signature_sz = _last_data_sz;
             return VS_CODE_OK;
         }
