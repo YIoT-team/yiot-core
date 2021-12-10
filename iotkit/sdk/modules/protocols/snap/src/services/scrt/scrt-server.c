@@ -91,9 +91,17 @@ _scrt_info_request_processor(const uint8_t *request,
 static vs_status_e
 _verify_owner_cert(const vs_cert_t *cert) {
     vs_status_e ret_code;
+    uint16_t users_amount = 0;
     char name[USER_NAME_SZ_MAX];
 
     STATUS_CHECK_RET(vs_crypto_hl_verify_cert(_secmodule, cert), "Wrong owner's certificate");
+
+    STATUS_CHECK_RET(vs_users_get_amount(VS_USER_OWNER, &users_amount), "Cannot get amount of device Owners");
+
+    if (!users_amount) {
+        VS_LOG_DEBUG("There are no owners, so accept key request from unknown user");
+        return VS_CODE_OK;
+    }
 
     STATUS_CHECK_RET(vs_users_get_name(VS_USER_OWNER, (vs_pubkey_dated_t *)cert->raw_cert, name, USER_NAME_SZ_MAX),
                      "Cannot find required owner");
