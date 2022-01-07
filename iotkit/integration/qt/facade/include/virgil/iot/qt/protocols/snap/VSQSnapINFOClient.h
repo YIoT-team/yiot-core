@@ -234,14 +234,14 @@ signals:
      * \param deviceInfo Device information
      */
     void
-    fireDeviceInfo(const VSQDeviceInfo &deviceInfo);
+    fireDeviceInfo(const struct VirgilIoTKit::vs_netif_t *src_netif, const VSQDeviceInfo &deviceInfo);
 
     /** Signal "New device has been activated"
      *
      * \param deviceInfo Device information
      */
     void
-    fireNewDevice(const VSQDeviceInfo &deviceInfo);
+    fireNewDevice(const struct VirgilIoTKit::vs_netif_t *src_netif, const VSQDeviceInfo &deviceInfo);
 
 private:
     const VirgilIoTKit::vs_snap_service_t *m_snapService;
@@ -256,13 +256,13 @@ private:
     timerEvent(QTimerEvent *event) override;
 
     VSQDeviceInfo &
-    getDevice(const VSQMac &mac);
+    getDevice(const struct VirgilIoTKit::vs_netif_t *src_netif, const VSQMac &mac);
 
     static VirgilIoTKit::vs_status_e
     startNotify(VirgilIoTKit::vs_snap_info_device_t *deviceRaw);
 
     static VirgilIoTKit::vs_status_e
-    generalInfo(VirgilIoTKit::vs_info_general_t *generalData);
+    generalInfo(const struct VirgilIoTKit::vs_netif_t *src_netif, VirgilIoTKit::vs_info_general_t *generalData);
 
     static VirgilIoTKit::vs_status_e
     statistics(VirgilIoTKit::vs_info_statistics_t *statistics);
