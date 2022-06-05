@@ -64,7 +64,7 @@ class VSQNetifBase;
  */
 class VSQImplementations {
 public:
-    typedef  QList<QSharedPointer<VSQNetifBase>> VSQNetifList;
+    typedef  QList<VSQNetifBase*> VSQNetifList;
 
     /** Add network interface implementation
      *
@@ -74,7 +74,7 @@ public:
      * \return Reference to the #VSQImplementations instance
      */
     VSQImplementations &
-    operator<<(QSharedPointer<VSQNetifBase> netif) {
+    operator<<(VSQNetifBase *netif) {
         m_netifs.push_back(netif);
         return *this;
     }

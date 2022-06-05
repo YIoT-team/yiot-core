@@ -59,7 +59,7 @@ VSQSnapCfgClient::onConfigResult(vs_snap_transaction_id_t id, vs_status_e res) {
 }
 
 void
-VSQSnapCfgClient::onConfigureDevice(QSharedPointer<VSQNetifBase> netif, VSQMac deviceMac) {
+VSQSnapCfgClient::onConfigureDevice(VSQNetifBase *netif, VSQMac deviceMac) {
     qDebug() << "Configure ssid:<" << m_ssid << "> pass:<" << m_pass << ">";
 
     if (!m_ssid.length()) {

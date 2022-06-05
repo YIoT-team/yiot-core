@@ -88,18 +88,12 @@ VSQSnapInfoClient::startNotify(vs_snap_info_device_t *deviceRaw) {
 vs_status_e
 VSQSnapInfoClient::generalInfo(const struct VirgilIoTKit::vs_netif_t *src_netif, vs_info_general_t *generalData) {
     VSQDeviceInfo &device = instance().getDevice(src_netif, generalData->default_netif_mac);
-    bool changed = false;
 
-    auto copyAndCheck = [&changed](auto &dst, const auto &src) {
-        changed = !dst.equal(src);
-        dst = src;
-    };
-
-    copyAndCheck(device.m_manufactureId, generalData->manufacture_id);
-    copyAndCheck(device.m_deviceType, generalData->device_type);
-    copyAndCheck(device.m_deviceRoles, generalData->device_roles);
-    copyAndCheck(device.m_fwVer, generalData->fw_ver);
-    copyAndCheck(device.m_tlVer, generalData->tl_ver);
+    device.m_manufactureId = generalData->manufacture_id;
+    device.m_deviceType = generalData->device_type;
+    device.m_deviceRoles = generalData->device_roles;
+    device.m_fwVer = generalData->fw_ver;
+    device.m_tlVer = generalData->tl_ver;
 
     auto rawName = reinterpret_cast<char*>(generalData->name);
     device.m_deviceName = QString::fromUtf8(rawName, strnlen(rawName, DEVICE_NAME_SZ_MAX));
@@ -107,22 +101,6 @@ VSQSnapInfoClient::generalInfo(const struct VirgilIoTKit::vs_netif_t *src_netif,
     device.m_hasProvision = generalData->has_provision;
     device.m_hasOwner = generalData->has_owner;
     device.m_needConnectionCreds = generalData->need_connection_creds;
-
-#if defined(LOG_GENERAL_INFO)
-    if (changed) {
-        VS_LOG_DEBUG(
-                "Device general info : MAC %s, manufacture ID \"%s\", device type \"%s\", device role(s) \"%s\", "
-                "Firmware version \"%s\", TrustList version \"%s\"",
-                VSQCString(device.m_mac.description()),
-                VSQCString(device.m_manufactureId.description()),
-                VSQCString(device.m_deviceType.description()),
-                VSQCString(device.m_deviceRoles.description()),
-                VSQCString(device.m_fwVer.description()),
-                VSQCString(device.m_tlVer.description()));
-    }
-#else
-    (void)changed;
-#endif
 
     device.m_isActive = true;
     device.m_hasGeneralInfo = true;

@@ -80,7 +80,7 @@ signals:
 
 public slots:
     void
-    onConfigureDevice(QSharedPointer<VSQNetifBase> netif, VSQMac deviceMac);
+    onConfigureDevice(VSQNetifBase *netif, VSQMac deviceMac);
 
     Q_INVOKABLE void
     onSetConfigData(QString ssid, QString pass);
