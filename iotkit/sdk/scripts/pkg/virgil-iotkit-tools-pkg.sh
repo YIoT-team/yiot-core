@@ -51,8 +51,8 @@ build_rpm() {
    pushd ${SCRIPT_PATH}/${PARAM_PACKAGE}
       scripts/prep-src.sh
       pushd ${SCRIPT_PATH}/${PARAM_PACKAGE}/build/srpm
-          sudo mock -n -N -r ${BUILD_OS_DISTR} --buildsrpm --resultdir=./ --spec *.spec --sources ./
-          sudo mock -n -N -r ${BUILD_OS_DISTR} *.src.rpm --resultdir=./
+          sudo mock -n -N -r ${BUILD_OS_DISTR} --buildsrpm --enable-network --resultdir=./ --spec *.spec --sources ./
+          sudo mock -n -N -r ${BUILD_OS_DISTR} *.src.rpm --enable-network --resultdir=./
           INST_PKG="$(ls *.rpm | grep -v '.src.rpm')"
           sudo mock -n -N -r ${BUILD_OS_DISTR} -i ${INST_PKG}
           cp *.rpm ${RESULT_DIR}
