@@ -121,8 +121,8 @@ func main()  {
     }
 
     app := &cli.App{
-        Name:    "virgil-iot-initializer",
-        Usage:   "Virgil Security utility for IoT devices initialization.",
+        Name:    "yiot-iot-initializer",
+        Usage:   "YIoT utility for IoT devices initialization.",
         Version: version,
         Flags:   flags,
         Action:  func(context *cli.Context) error {
