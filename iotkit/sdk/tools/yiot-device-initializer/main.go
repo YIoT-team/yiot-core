@@ -1,3 +1,22 @@
+//  ────────────────────────────────────────────────────────────
+//                     ╔╗  ╔╗ ╔══╗      ╔════╗
+//                     ║╚╗╔╝║ ╚╣╠╝      ║╔╗╔╗║
+//                     ╚╗╚╝╔╝  ║║  ╔══╗ ╚╝║║╚╝
+//                      ╚╗╔╝   ║║  ║╔╗║   ║║
+//                       ║║   ╔╣╠╗ ║╚╝║   ║║
+//                       ╚╝   ╚══╝ ╚══╝   ╚╝
+//    ╔╗╔═╗                    ╔╗                     ╔╗
+//    ║║║╔╝                   ╔╝╚╗                    ║║
+//    ║╚╝╝  ╔══╗ ╔══╗ ╔══╗  ╔╗╚╗╔╝  ╔══╗ ╔╗ ╔╗╔╗ ╔══╗ ║║  ╔══╗
+//    ║╔╗║  ║║═╣ ║║═╣ ║╔╗║  ╠╣ ║║   ║ ═╣ ╠╣ ║╚╝║ ║╔╗║ ║║  ║║═╣
+//    ║║║╚╗ ║║═╣ ║║═╣ ║╚╝║  ║║ ║╚╗  ╠═ ║ ║║ ║║║║ ║╚╝║ ║╚╗ ║║═╣
+//    ╚╝╚═╝ ╚══╝ ╚══╝ ║╔═╝  ╚╝ ╚═╝  ╚══╝ ╚╝ ╚╩╩╝ ║╔═╝ ╚═╝ ╚══╝
+//                    ║║                         ║║
+//                    ╚╝                         ╚╝
+//
+//    Lead Maintainer: Roman Kutashenko <kutashenko@gmail.com>
+//  ────────────────────────────────────────────────────────────
+
 //   Copyright (C) 2015-2019 Virgil Security Inc.
 //
 //   All rights reserved.
@@ -35,107 +54,111 @@
 package main
 
 import (
-    "log"
-    "os"
+	"log"
+	"os"
 
-    "./initializer"
+	"./initializer"
 
-    "gopkg.in/urfave/cli.v2"
+	"gopkg.in/urfave/cli.v2"
 )
 
 var version = "0.1.0"
 
+func main() {
+	flags := []cli.Flag{
+		&cli.StringFlag{
+			Name:    "output",
+			Aliases: []string{"o"},
+			Usage:   "Output file",
+		},
+		&cli.StringFlag{
+			Name:    "device_info_output",
+			Aliases: []string{"i"},
+			Usage:   "Device info output file",
+		},
+		&cli.StringFlag{
+			Name:    "auth_pub_key_1",
+			Aliases: []string{"u"},
+			Usage:   "File with 1st auth public key",
+		},
+		&cli.StringFlag{
+			Name:    "auth_pub_key_2",
+			Aliases: []string{"p"},
+			Usage:   "File with 2nd auth public key",
+		},
+		&cli.StringFlag{
+			Name:    "rec_pub_key_1",
+			Aliases: []string{"e"},
+			Usage:   "File with 1st recovery public key",
+		},
+		&cli.StringFlag{
+			Name:    "rec_pub_key_2",
+			Aliases: []string{"c"},
+			Usage:   "File with 2nd recovery public key",
+		},
+		&cli.StringFlag{
+			Name:    "tl_pub_key_1",
+			Aliases: []string{"b"},
+			Usage:   "File with 1st trust list public key",
+		},
+		&cli.StringFlag{
+			Name:    "tl_pub_key_2",
+			Aliases: []string{"k"},
+			Usage:   "File with 2nd trust list public key",
+		},
+		&cli.StringFlag{
+			Name:    "fw_pub_key_1",
+			Aliases: []string{"w"},
+			Usage:   "File with 1st firmware public key",
+		},
+		&cli.StringFlag{
+			Name:    "fw_pub_key_2",
+			Aliases: []string{"x"},
+			Usage:   "File with 2nd firmware public key",
+		},
+		&cli.StringFlag{
+			Name:    "trust_list",
+			Aliases: []string{"f"},
+			Usage:   "File with trust list",
+		},
+		&cli.BoolFlag{
+			Name:    "create_card_only",
+			Aliases: []string{"d"},
+			Usage:   "Create card request only",
+		},
+		&cli.BoolFlag{
+			Name:    "trust_list_only",
+			Aliases: []string{"y"},
+			Usage:   "Use Trust List only",
+		},
+		&cli.StringFlag{
+			Name:    "factory_key",
+			Aliases: []string{"z"},
+			Usage:   "File with Factory private key",
+		},
+		&cli.StringFlag{
+			Name:    "license_data",
+			Aliases: []string{"t"},
+			Usage:   "Extra data for license",
+		},
+	}
 
-func main()  {
-    flags := []cli.Flag{
-        &cli.StringFlag{
-            Name:    "output",
-            Aliases: []string{"o"},
-            Usage:   "Output file",
-        },
-        &cli.StringFlag{
-            Name:    "device_info_output",
-            Aliases: []string{"i"},
-            Usage:   "Device info output file",
-        },
-        &cli.StringFlag{
-            Name:    "auth_pub_key_1",
-            Aliases: []string{"u"},
-            Usage:   "File with 1st auth public key",
-        },
-        &cli.StringFlag{
-            Name:    "auth_pub_key_2",
-            Aliases: []string{"p"},
-            Usage:   "File with 2nd auth public key",
-        },
-        &cli.StringFlag{
-            Name:    "rec_pub_key_1",
-            Aliases: []string{"e"},
-            Usage:   "File with 1st recovery public key",
-        },
-        &cli.StringFlag{
-            Name:    "rec_pub_key_2",
-            Aliases: []string{"c"},
-            Usage:   "File with 2nd recovery public key",
-        },
-        &cli.StringFlag{
-            Name:    "tl_pub_key_1",
-            Aliases: []string{"b"},
-            Usage:   "File with 1st trust list public key",
-        },
-        &cli.StringFlag{
-            Name:    "tl_pub_key_2",
-            Aliases: []string{"k"},
-            Usage:   "File with 2nd trust list public key",
-        },
-        &cli.StringFlag{
-            Name:    "fw_pub_key_1",
-            Aliases: []string{"w"},
-            Usage:   "File with 1st firmware public key",
-        },
-        &cli.StringFlag{
-            Name:    "fw_pub_key_2",
-            Aliases: []string{"x"},
-            Usage:   "File with 2nd firmware public key",
-        },
-        &cli.StringFlag{
-            Name:    "trust_list",
-            Aliases: []string{"f"},
-            Usage:   "File with trust list",
-        },
-        &cli.BoolFlag{
-            Name:    "create_card_only",
-            Aliases: []string{"d"},
-            Usage:   "Create card request only",
-        },
-        &cli.BoolFlag{
-            Name:    "trust_list_only",
-            Aliases: []string{"y"},
-            Usage:   "Use Trust List only",
-        },
-        &cli.StringFlag{
-            Name:    "factory_key",
-            Aliases: []string{"z"},
-            Usage:   "File with Factory private key",
-        },
-    }
+	app := &cli.App{
+		Name:    "yiot-iot-initializer",
+		Usage:   "YIoT utility for IoT devices initialization.",
+		Version: version,
+		Flags:   flags,
+		Action: func(context *cli.Context) error {
+			i, err := initializer.New(context)
+			if err != nil {
+				return err
+			}
+			return i.InitializeDevices()
+		},
+	}
 
-    app := &cli.App{
-        Name:    "yiot-iot-initializer",
-        Usage:   "YIoT utility for IoT devices initialization.",
-        Version: version,
-        Flags:   flags,
-        Action:  func(context *cli.Context) error {
-            i, err := initializer.New(context)
-            if err != nil {
-                return err
-            }
-            return i.InitializeDevices()
-        },
-    }
-
-    err := app.Run(os.Args)
-    if err != nil {
-        log.Fatal(err)
-    }
+	err := app.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

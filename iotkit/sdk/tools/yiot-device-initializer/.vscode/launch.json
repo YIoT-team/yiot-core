@@ -38,6 +38,8 @@
                 "/home/kutashenko/Work/keywest/security/scripts/credentials/provision-package/./TrustList_27343.tl",
                 "--factory_key",
                 "/home/kutashenko/Work/keywest/security/scripts/credentials/provision-package/private/factory_39452_factory_1.key",
+                "--license_data",
+                "/home/kutashenko/Work/keywest/security/scripts/credentials/lic-base.json",
             ],
             "env": {
                 "GOPATH": "/home/kutashenko/go",
