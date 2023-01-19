@@ -133,6 +133,9 @@ vs_provision_get_slot_num(vs_provision_element_id_e id, uint16_t *slot) {
     case VS_PROVISION_SGNP:
         *slot = SIGNATURE_SLOT;
         return VS_CODE_OK;
+    case VS_PROVISION_LIC:
+        *slot = LICENSE_SLOT;
+        return VS_CODE_OK;
     default:
         VS_LOG_ERROR("Incorrect provision element %d", id);
         return VS_CODE_ERR_INCORRECT_ARGUMENT;

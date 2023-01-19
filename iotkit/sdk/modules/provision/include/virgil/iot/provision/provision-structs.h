@@ -172,7 +172,8 @@ typedef enum {
     VS_PROVISION_PBT1 = VS_PRVS_PBT1,
     VS_PROVISION_PBT2 = VS_PRVS_PBT2,
     VS_PROVISION_PBF1 = VS_PRVS_PBF1,
-    VS_PROVISION_PBF2 = VS_PRVS_PBF2
+    VS_PROVISION_PBF2 = VS_PRVS_PBF2,
+    VS_PROVISION_LIC = VS_PRVS_LIC,
 } vs_provision_element_id_e;
 
 /** File version information */

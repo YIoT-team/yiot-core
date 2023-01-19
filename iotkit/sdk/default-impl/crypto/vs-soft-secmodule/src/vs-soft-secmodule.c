@@ -159,7 +159,8 @@ _get_slot_name(vs_iot_secmodule_slot_e slot) {
         return "STD_TMP_6";
     case VS_KEY_SLOT_EXT_TMP_0:
         return "EXT_TMP_0";
-
+    case VS_KEY_SLOT_LICENSE:
+        return "LICENSE";
     default:
         assert(false && "Unsupported slot");
         return NULL;

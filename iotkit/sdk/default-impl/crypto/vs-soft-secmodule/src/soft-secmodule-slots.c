@@ -172,6 +172,10 @@ _get_slot_size(vs_iot_secmodule_slot_e slot) {
         return KEY_SLOT_EXT_DATA_SIZE;
     }
 
+    if (slot < VS_KEY_SLOT_LICENSE) {
+        return KEY_SLOT_LIC_DATA_SIZE;
+    }
+
     return -1;
 }
 
