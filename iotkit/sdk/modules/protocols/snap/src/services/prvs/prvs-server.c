@@ -508,6 +508,29 @@ _prvs_finalize_tl_process_request(const struct vs_netif_t *netif, const uint8_t 
 
 /******************************************************************************/
 static vs_status_e
+_prvs_lic_save_process_request(const struct vs_netif_t *netif, const uint8_t *request, const uint16_t request_sz) {
+    vs_status_e ret_code = VS_CODE_OK;
+    vs_snap_prvs_set_data_t *data = (vs_snap_prvs_set_data_t *)request;
+    VS_PRVS_SERVER_PROFILE_START;
+
+    CHECK_RET(request_sz > sizeof(vs_snap_prvs_set_data_t),
+              VS_CODE_ERR_INCORRECT_PARAMETER,
+              "Wrong provision key save request");
+
+    vs_snap_prvs_set_data_t_decode(data);
+
+    if (_last_request_id != data->request_id) {
+        ret_code = vs_prvs_save_data(VS_PRVS_LIC, data->data, request_sz - sizeof(vs_snap_prvs_set_data_t));
+        _last_request_id = data->request_id;
+    }
+
+    VS_PRVS_SERVER_PROFILE_END(_prvs_key_save_process_request);
+
+    return ret_code;
+}
+
+/******************************************************************************/
+static vs_status_e
 _prvs_service_request_processor(const struct vs_netif_t *netif,
                                 const vs_ethernet_header_t *eth_header,
                                 vs_snap_element_t element_id,
@@ -539,6 +562,9 @@ _prvs_service_request_processor(const struct vs_netif_t *netif,
 
     case VS_PRVS_TLF:
         return _prvs_finalize_tl_process_request(netif, request, request_sz);
+
+    case VS_PRVS_LIC:
+        return _prvs_lic_save_process_request(netif, request, request_sz);
 
     case VS_PRVS_PBR1:
     case VS_PRVS_PBR2:

@@ -158,6 +158,7 @@ typedef enum {
     VS_PRVS_DEVI = HTONL_IN_COMPILE_TIME('DEVI'), /**< Get DEVice Info */
     VS_PRVS_ASAV = HTONL_IN_COMPILE_TIME('ASAV'), /**< Action SAVe provision */
     VS_PRVS_ASGN = HTONL_IN_COMPILE_TIME('ASGN'), /**< Action SiGN data */
+    VS_PRVS_LIC = HTONL_IN_COMPILE_TIME('_LIC'), /**< Set Device License */
 } vs_snap_prvs_element_e;
 #pragma GCC diagnostic pop
 
