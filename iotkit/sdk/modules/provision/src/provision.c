@@ -499,3 +499,30 @@ vs_provision_own_cert(vs_cert_t *cert,
 }
 
 /******************************************************************************/
+vs_status_e
+vs_provision_license(uint8_t *license_buf, uint16_t buf_sz, uint16_t *license_sz) {
+    vs_status_e ret_code;
+
+    *license_sz = 0;
+
+    // Check input parameters
+    CHECK_NOT_ZERO_RET(license_buf, VS_CODE_ERR_NULLPTR_ARGUMENT);
+    CHECK_NOT_ZERO_RET(buf_sz, VS_CODE_ERR_NULLPTR_ARGUMENT);
+    CHECK_NOT_ZERO_RET(license_sz, VS_CODE_ERR_NULLPTR_ARGUMENT);
+
+    // Check if provision ready
+    CHECK_RET(vs_provision_is_ready(), VS_CODE_ERR_NOT_FOUND, "Provision is not ready");
+
+    // Load license
+    STATUS_CHECK_RET(_secmodule->slot_load(LICENSE_SLOT,
+                                           license_buf,
+                                           buf_sz,
+                                           license_sz),
+                     "Unable to load license");
+
+    // Parse JSON license
+
+    return VS_CODE_OK;
+}
+
+/******************************************************************************/

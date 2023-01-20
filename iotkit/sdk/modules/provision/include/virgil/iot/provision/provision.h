@@ -1,3 +1,22 @@
+//  ────────────────────────────────────────────────────────────
+//                     ╔╗  ╔╗ ╔══╗      ╔════╗
+//                     ║╚╗╔╝║ ╚╣╠╝      ║╔╗╔╗║
+//                     ╚╗╚╝╔╝  ║║  ╔══╗ ╚╝║║╚╝
+//                      ╚╗╔╝   ║║  ║╔╗║   ║║
+//                       ║║   ╔╣╠╗ ║╚╝║   ║║
+//                       ╚╝   ╚══╝ ╚══╝   ╚╝
+//    ╔╗╔═╗                    ╔╗                     ╔╗
+//    ║║║╔╝                   ╔╝╚╗                    ║║
+//    ║╚╝╝  ╔══╗ ╔══╗ ╔══╗  ╔╗╚╗╔╝  ╔══╗ ╔╗ ╔╗╔╗ ╔══╗ ║║  ╔══╗
+//    ║╔╗║  ║║═╣ ║║═╣ ║╔╗║  ╠╣ ║║   ║ ═╣ ╠╣ ║╚╝║ ║╔╗║ ║║  ║║═╣
+//    ║║║╚╗ ║║═╣ ║║═╣ ║╚╝║  ║║ ║╚╗  ╠═ ║ ║║ ║║║║ ║╚╝║ ║╚╗ ║║═╣
+//    ╚╝╚═╝ ╚══╝ ╚══╝ ║╔═╝  ╚╝ ╚═╝  ╚══╝ ╚╝ ╚╩╩╝ ║╔═╝ ╚═╝ ╚══╝
+//                    ║║                         ║║
+//                    ╚╝                         ╚╝
+//
+//    Lead Maintainer: Roman Kutashenko <kutashenko@gmail.com>
+//  ────────────────────────────────────────────────────────────
+
 //  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
@@ -233,6 +252,20 @@ vs_provision_tl_find_next_key(vs_provision_tl_find_ctx_t *search_ctx,
 vs_status_e
 vs_provision_own_cert(vs_cert_t *cert,
                       uint16_t buffer_sz);
+
+/** Get verified license
+ *
+ * This function loads license if present, and verifies signatures
+ *
+ * \param[out] license_buf Buffer to copy license. Must not be NULL.
+ * \param[in] buf_sz Size of a buffer for a license
+ * \param[out] license_sz License information size. Must not be NULL.
+ *
+ * \return #VS_CODE_OK in case of success or error code.
+ *
+ */
+vs_status_e
+vs_provision_license(uint8_t *license_buf, uint16_t buf_sz, uint16_t *license_sz);
 
 #ifdef __cplusplus
 } // extern "C"

@@ -72,8 +72,6 @@ namespace VirgilIoTKit {
 extern "C" {
 #endif
 
-#define VS_SLOTS_STORAGE_MAX_SIZE (1024)
-
 /** Initialize software crypto implementation
  *
  * \param[in] slots_storage_impl Storage context. Must not be NULL.

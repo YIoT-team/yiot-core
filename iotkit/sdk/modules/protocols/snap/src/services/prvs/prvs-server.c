@@ -515,7 +515,7 @@ _prvs_lic_save_process_request(const struct vs_netif_t *netif, const uint8_t *re
 
     CHECK_RET(request_sz > sizeof(vs_snap_prvs_set_data_t),
               VS_CODE_ERR_INCORRECT_PARAMETER,
-              "Wrong provision key save request");
+              "Wrong provision license save request");
 
     vs_snap_prvs_set_data_t_decode(data);
 
