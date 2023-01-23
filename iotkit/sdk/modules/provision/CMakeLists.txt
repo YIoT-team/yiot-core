@@ -53,6 +53,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/trust_list)
 #
 add_library(vs-module-provision
         src/provision.c
+        src/license.c
         )
 
 target_sources(vs-module-provision
@@ -60,9 +61,11 @@ target_sources(vs-module-provision
         # Headers
         ${CMAKE_CURRENT_LIST_DIR}/include/virgil/iot/provision/provision.h
         ${CMAKE_CURRENT_LIST_DIR}/include/virgil/iot/provision/provision-structs.h
+        ${CMAKE_CURRENT_LIST_DIR}/include/virgil/iot/provision/license.h
 
         # Sources
         ${CMAKE_CURRENT_LIST_DIR}/src/provision.c
+        ${CMAKE_CURRENT_LIST_DIR}/src/license.c
         )
 
 #
@@ -112,6 +115,8 @@ target_link_libraries(vs-module-provision
         vs-module-crypto-high-level
         PRIVATE
         virgil-iot-status-code
+        vs-json
+        vs-base64
         )
 
 install(TARGETS vs-module-provision

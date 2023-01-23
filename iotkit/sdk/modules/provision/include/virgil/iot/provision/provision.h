@@ -253,6 +253,19 @@ vs_status_e
 vs_provision_own_cert(vs_cert_t *cert,
                       uint16_t buffer_sz);
 
+/** Verify license
+ *
+ * This function verifies license in buffer
+ *
+ * \param[in] license_buf License. Must not be NULL.
+ * \param[in] buf_sz Size of a license
+ *
+ * \return #VS_CODE_OK in case of success verification or error code.
+ *
+ */
+vs_status_e
+vs_license_verify(uint8_t *license_buf, uint16_t license_sz);
+
 /** Get verified license
  *
  * This function loads license if present, and verifies signatures
@@ -265,7 +278,20 @@ vs_provision_own_cert(vs_cert_t *cert,
  *
  */
 vs_status_e
-vs_provision_license(uint8_t *license_buf, uint16_t buf_sz, uint16_t *license_sz);
+vs_license_get(uint8_t *license_buf, uint16_t buf_sz, uint16_t *license_sz);
+
+/** Save license
+ *
+ * This function verifies and saves license
+ *
+* \param[in] license_buf License. Must not be NULL.
+* \param[in] buf_sz Size of a license
+ *
+ * \return #VS_CODE_OK in case of success or error code.
+ *
+ */
+vs_status_e
+vs_license_save(uint8_t *license_buf, uint16_t license_sz);
 
 #ifdef __cplusplus
 } // extern "C"
