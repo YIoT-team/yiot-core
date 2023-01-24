@@ -271,3 +271,27 @@ terminate:
 }
 
 /******************************************************************************/
+vs_status_e
+vs_license_save(uint8_t *license_buf, uint16_t license_sz) {
+    vs_status_e res = VS_CODE_ERR_UNSUPPORTED;
+    uint16_t slot;
+
+    // Check input parameters
+    CHECK_NOT_ZERO_RET(license_buf, VS_CODE_ERR_NULLPTR_ARGUMENT);
+    CHECK_NOT_ZERO_RET(license_sz, VS_CODE_ERR_NULLPTR_ARGUMENT);
+
+    // Verify a license
+    STATUS_CHECK(vs_license_verify(license_buf, license_sz), "Cannot verify a license to be saved");
+
+    // Save License
+    STATUS_CHECK(vs_provision_get_slot_num((vs_provision_element_id_e)VS_PRVS_LIC, &slot), "Cannot get license slot");
+    STATUS_CHECK(_secmodule->slot_save(slot, license_buf, license_sz), "Cannot save license");
+
+    res = VS_CODE_OK;
+
+terminate:
+
+    return res;
+}
+
+/******************************************************************************/
