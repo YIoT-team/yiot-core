@@ -557,5 +557,5 @@ func (p *DeviceProcessor) SignDataInDevice(data []byte) ([]byte, error) {
 }
 
 func (p *DeviceProcessor) SetLicense(licanse string) error {
-	return p.uploadData( /*C.VS_PRVS_LIC_*/ C.VS_PRVS_PBT2, []byte(licanse), "License")
+	return p.uploadData(C.VS_PRVS_LIC, []byte(licanse), "License")
 }
