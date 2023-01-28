@@ -365,6 +365,7 @@ _prvs_key_save_process_request(const struct vs_netif_t *netif,
                                const uint16_t request_sz) {
     vs_status_e ret_code = VS_CODE_OK;
     vs_snap_prvs_set_data_t *data = (vs_snap_prvs_set_data_t *)request;
+    char *el = (char *)&element_id;
     VS_PRVS_SERVER_PROFILE_START;
 
     CHECK_RET(request_sz > sizeof(vs_snap_prvs_set_data_t),
@@ -379,6 +380,10 @@ _prvs_key_save_process_request(const struct vs_netif_t *netif,
     }
 
     VS_PRVS_SERVER_PROFILE_END(_prvs_key_save_process_request);
+
+    if (VS_CODE_OK == ret_code) {
+        VS_LOG_INFO("KEY %c%c%c%c SAVED SUCCESSFULLY", el[0], el[1], el[2], el[3]);
+    }
 
     return ret_code;
 }
@@ -424,6 +429,10 @@ _prvs_asav_process_request(const struct vs_netif_t *netif,
     vs_status_e ret_code = vs_prvs_finalize_storage(asav_response, response_sz);
 
     VS_PRVS_SERVER_PROFILE_END(_prvs_asav_process_request);
+
+    if (VS_CODE_OK == ret_code) {
+        VS_LOG_INFO("DEVICE SIGNATURE SAVED SUCCESSFULLY");
+    }
 
     return ret_code;
 }
@@ -503,6 +512,9 @@ _prvs_finalize_tl_process_request(const struct vs_netif_t *netif, const uint8_t 
                          "Unable to finalize Trust List");
         _last_request_id = data->request_id;
     }
+
+    VS_LOG_INFO("TRUST LIST SAVED SUCCESSFULLY");
+
     return VS_CODE_OK;
 }
 
@@ -525,6 +537,10 @@ _prvs_lic_save_process_request(const struct vs_netif_t *netif, const uint8_t *re
     }
 
     VS_PRVS_SERVER_PROFILE_END(_prvs_key_save_process_request);
+
+    if (VS_CODE_OK == ret_code) {
+        VS_LOG_INFO("LICENSE SAVED SUCCESSFULLY");
+    }
 
     return ret_code;
 }

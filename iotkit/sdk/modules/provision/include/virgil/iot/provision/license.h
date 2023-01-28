@@ -21,6 +21,7 @@
 #define VS_IOT_LICENSE_H
 
 #include <virgil/iot/secmodule/secmodule.h>
+#include <virgil/iot/protocols/snap.h>
 #include <virgil/iot/provision/provision-structs.h>
 #include <virgil/iot/status_code/status_code.h>
 #include <virgil/iot/storage_hal/storage_hal.h>
@@ -30,8 +31,9 @@ namespace VirgilIoTKit {
 extern "C" {
 #endif
 
-#define VS_LICENSE_DATA_MAX_SZ (4 * 1024)
+#define VS_LICENSE_DATA_MAX_SZ (10 * 1024)
 #define VS_LICENSE_SIGN_MAX_SZ (1024)
+#define VS_LICENSE_KEY_MAX_SZ (512)
 
 /** License initialization
  *
@@ -95,6 +97,30 @@ vs_license_plain_data(uint8_t *license_buf, uint16_t license_sz,
 vs_status_e
 vs_license_verify(uint8_t *license_buf, uint16_t license_sz);
 
+/** Check if license content matches required data
+*
+* Parse license data and compare: public key, mac address, serial number, manufacturer and model
+*
+* \param[in] license_buf License. Must not be NULL.
+* \param[in] buf_sz Size of a license
+* \param[in] raw_pubkey Raw Public Key
+* \param[in] raw_pubkey_sz Raw Public Key size
+* \param[in] mac_addr MAC address
+* \param[in] serial_number Serial number
+* \param[in] manufacturer Manufacturer
+* \param[in] model Model
+*
+* \return #VS_CODE_OK in case of success comparing or error code.
+*
+ */
+vs_status_e
+vs_license_matches(uint8_t *license, uint16_t license_sz,
+                   uint8_t *raw_pubkey, uint16_t raw_pubkey_sz,
+                   vs_mac_addr_t mac_addr,
+                   vs_device_serial_t serial_number,
+                   vs_device_manufacture_id_t manufacturer,
+                   vs_device_type_t model);
+
 /** Get verified license
 *
 * This function loads license if present, and verifies signatures
@@ -121,6 +147,25 @@ vs_license_get(uint8_t *license_buf, uint16_t buf_sz, uint16_t *license_sz);
 */
 vs_status_e
 vs_license_save(uint8_t *license_buf, uint16_t license_sz);
+
+/** Parse all license data
+*
+* \return #VS_CODE_OK in case of success or error code.
+*
+ */
+vs_status_e
+vs_license_plain_data_parse(uint8_t *license_data, uint16_t license_data_sz,
+                            uint64_t *timestamp,
+                            vs_device_manufacture_id_t manufacturer,
+                            vs_device_type_t model,
+                            vs_device_serial_t serial,
+                            uint32_t *roles,
+                            vs_mac_addr_t *mac,
+                            uint8_t *key_type,
+                            uint8_t *ec_type,
+                            char *pubkey_buf, uint16_t pubkey_buf_sz, uint16_t *pubkey_sz,
+                            char *sign_buf, uint16_t sign_buf_sz, uint16_t *sign_sz,
+                            char *extra_data_buf, uint16_t extra_data_buf_sz, uint16_t *extra_data_sz);
 
 #ifdef __cplusplus
 } // extern "C"
