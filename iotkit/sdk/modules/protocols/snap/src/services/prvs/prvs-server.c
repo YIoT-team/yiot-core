@@ -539,6 +539,7 @@ _prvs_lic_save_process_request(const struct vs_netif_t *netif, const uint8_t *re
     VS_PRVS_SERVER_PROFILE_END(_prvs_key_save_process_request);
 
     if (VS_CODE_OK == ret_code) {
+        vs_provision_update();
         VS_LOG_INFO("LICENSE SAVED SUCCESSFULLY");
     }
 
