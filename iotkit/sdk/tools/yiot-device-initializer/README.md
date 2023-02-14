@@ -1,5 +1,5 @@
-# Virgil Device Initializer
-The Virgil Device Initializer is a CLI utility used to handle IoT device provisioning and create the devices' digital cards.
+# YIoT Device Initializer
+The YIoT Device Initializer is a CLI utility used to handle IoT device provisioning and create the devices' digital certificates.
 
 ## Content
 - [Overview](#Overview)
@@ -12,9 +12,9 @@ The Virgil Device Initializer is a CLI utility used to handle IoT device provisi
 - [Command Reference](#command-reference)
 
 ## Overview
-To make each IoT device identifiable, verifiable and trusted by each party within the complete IoT solution, you need to provide them with specific provisioning files, generate private keys and create the digital cards for device registration on the Virgil Cloud.
+To make each IoT device identifiable, verifiable and trusted by each party within the complete IoT solution, you need to provide them with specific provisioning files, generate private keys and create the digital certificate.
 
-The Virgil Device Initializer allows you to handle IoT device provisioning and prepare your IoT device (by creating its digital card) for its registration on the Virgil Cloud.
+The YIoT Device Initializer allows you to handle IoT device provisioning and prepare your IoT device (by creating its digital certificates).
 
 ## How It Works
 The IoT device provisioning process consists of 2 steps: preparation and initialization.
@@ -40,34 +40,34 @@ In order to perform device initialization, the following steps need to be perfor
 Initialization of each device is individually performed one by one.
 
 ## Setting up Device Initializer
-This section demonstrates how to install and configure the Virgil Device Initializer for your platform of choice.
+This section demonstrates how to install and configure the YIoT Device Initializer for your platform of choice.
 
 ### Install Device Initializer
-This section provides instructions for how to install the Virgil Device Initializer.
+This section provides instructions for how to install the YIoT Device Initializer.
 
 #### Linux OS
-Virgil Device Initializer is distributed as a package.
+YIoT Device Initializer is distributed as a package.
 
-In order to download and install the Virgil Device Initializer on Linux, use the YUM package manager and run the following command:
+In order to download and install the YIoT Device Initializer on Linux, use the YUM package manager and run the following command:
 
 ```bash
-$ sudo yum install virgil-iot-sdk-tools
+$ sudo yum install yiot-iot-sdk-tools
 ```
 #### Ubuntu OS, Debian OS
-Virgil Device Initializer is distributed as a package.
+YIoT Device Initializer is distributed as a package.
 
-In order to download and install the Virgil Device Initializer on Ubuntu, Debian, use the YUM package manager and run the following command:
+In order to download and install the YIoT Device Initializer on Ubuntu, Debian, use the YUM package manager and run the following command:
 ```bash
-$ sudo apt-get install virgil-iot-sdk-tools
+$ sudo apt-get install yiot-iot-sdk-tools
 ```
 
 #### CentOS, Fedora OS
-Virgil Device Initializer is distributed as a package.
+YIoT Device Initializer is distributed as a package.
 
-In order to download and install the Virgil Device Initializer on CentOS, Fedora, use the YUM package manager and run the following command:
+In order to download and install the YIoT Device Initializer on CentOS, Fedora, use the YUM package manager and run the following command:
 
 ```bash
-$ sudo yum install virgil-iot-sdk-tools
+$ sudo yum install yiot-iot-sdk-tools
 ```
 
 #### Mac OS
@@ -82,10 +82,10 @@ $ make vs-tool-yiot-device-initializer
 ```
 
 #### Windows OS
-Virgil Device Initializer package for Windows OS is currently in development. To join our mailing list to receive updates, please contact our support team at support@VirgilSecurity.com.
+YIoT Device Initializer package for Windows OS is currently in development. To join our mailing list to receive updates, please contact our support team at support@VirgilSecurity.com.
 
 ## Command Reference
-Here is the list of the commands for Virgil Device Initializer:
+Here is the list of the commands for YIoT Device Initializer:
 
 ### Syntax
 The CLI has the following syntax:
@@ -105,14 +105,14 @@ yiot-device-initializer
 --trust_list "/root/current-credentials/key_storage/trust_lists/release/TrustList_16568.tl"
 --factory_key "/root/current-credentials/key_storage/private/factory_24251_factory.key"
 ```
-Use  ```virgil-device-initializer -h```   to see the list of available arguments.
+Use  ```yiot-device-initializer -h```   to see the list of available arguments.
 
 ### Device Initialization
-In order to initialize the IoT device, Virgil Device Initializer uses the following command:
+In order to initialize the IoT device, YIoT Device Initializer uses the following command:
 
-| Command                                                                                   | Description                                                         |
-|-------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
-| ```virgil-device-initializer [global options] command [command options] [arguments...]``` | CLI forms a Device card request and store it in ```transfer file``` |
+| Command                                                                                 | Description                                                         |
+|-----------------------------------------------------------------------------------------|---------------------------------------------------------------------|
+| ```yiot-device-initializer [global options] command [command options] [arguments...]``` | CLI forms a Device card request and store it in ```transfer file``` |
 
 The result of the command execution is the following:
 

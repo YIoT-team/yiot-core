@@ -411,6 +411,9 @@ json_get_val_float(jobj_t *jobj, char *key, float *value);
 int
 json_get_val_str(jobj_t *jobj, char *key, char *value, int max_len);
 
+int
+json_get_part_str(jobj_t *jobj, char *key, char *value, int max_len);
+
 /** Get JSON string length
  *
  * Gets the length of a JSON string element from an object based on
