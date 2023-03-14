@@ -215,7 +215,6 @@ vs_license_verify(uint8_t *license_buf, uint16_t license_sz) {
           "Cant't decode base64 license signature");
 
     // Verify signature
-    /*----Verify cloud signature----*/
     bool key_present = true;
     bool verified = false;
     vs_provision_tl_find_ctx_t search_ctx;

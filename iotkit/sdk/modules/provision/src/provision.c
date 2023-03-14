@@ -498,31 +498,39 @@ vs_provision_own_cert(vs_cert_t *cert,
     return VS_CODE_OK;
 }
 
-/******************************************************************************/
+/******************************************************************/
 vs_status_e
-vs_provision_license(uint8_t *license_buf, uint16_t buf_sz, uint16_t *license_sz) {
-    vs_status_e ret_code;
+vs_provision_factory_present(const uint8_t *raw_key, uint16_t raw_key_sz) {
+    vs_provision_tl_find_ctx_t search_ctx;
+    uint8_t *pubkey = NULL;
+    uint16_t pubkey_sz = 0;
+    uint8_t *meta = NULL;
+    uint16_t meta_sz;
+    vs_pubkey_dated_t *pubkey_dated = NULL;
+    bool key_present;
 
-    *license_sz = 0;
+    CHECK_NOT_ZERO_RET(raw_key, VS_CODE_ERR_NULLPTR_ARGUMENT);
+    CHECK_NOT_ZERO_RET(raw_key_sz, VS_CODE_ERR_ZERO_ARGUMENT);
 
-    // Check input parameters
-    CHECK_NOT_ZERO_RET(license_buf, VS_CODE_ERR_NULLPTR_ARGUMENT);
-    CHECK_NOT_ZERO_RET(buf_sz, VS_CODE_ERR_NULLPTR_ARGUMENT);
-    CHECK_NOT_ZERO_RET(license_sz, VS_CODE_ERR_NULLPTR_ARGUMENT);
+    // Find the first factory key
+    CHECK(VS_CODE_OK == vs_provision_tl_find_first_key(
+                                &search_ctx, VS_KEY_FACTORY, &pubkey_dated, &pubkey, &pubkey_sz, &meta, &meta_sz),
+          "Can't find the first factory key in TL");
 
-    // Check if provision ready
-    CHECK_RET(vs_provision_is_ready(), VS_CODE_ERR_NOT_FOUND, "Provision is not ready");
+    do {
+        if (pubkey_sz == raw_key_sz && 0 == VS_IOT_MEMCMP(pubkey, raw_key, raw_key_sz)) {
+            return VS_CODE_OK;
+        }
 
-    // Load license
-    STATUS_CHECK_RET(_secmodule->slot_load(LICENSE_SLOT,
-                                           license_buf,
-                                           buf_sz,
-                                           license_sz),
-                     "Unable to load license");
+        // Try to find a next key
+        key_present = VS_CODE_OK ==
+                      vs_provision_tl_find_next_key(&search_ctx, &pubkey_dated, &pubkey, &pubkey_sz, &meta, &meta_sz);
 
-    // Parse JSON license
+    } while (key_present);
 
-    return VS_CODE_OK;
+terminate:
+
+    return VS_CODE_ERR_NOT_FOUND;
 }
 
 /******************************************************************************/

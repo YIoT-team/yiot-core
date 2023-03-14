@@ -170,5 +170,4 @@ vs_crypto_hl_verify_cert(vs_secmodule_impl_t *_secmodule, const vs_cert_t *cert)
     return VS_CODE_OK;
 }
 
-
 /******************************************************************************/

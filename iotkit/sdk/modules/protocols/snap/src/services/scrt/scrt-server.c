@@ -96,6 +96,13 @@ _verify_owner_cert(const vs_cert_t *cert) {
 
     STATUS_CHECK_RET(vs_crypto_hl_verify_cert(_secmodule, cert), "Wrong owner's certificate");
 
+    // Check if the same Root of trust. Factory key should be in TrustList
+    const vs_sign_t *sign = (vs_sign_t *)&cert->raw_cert[cert->key_sz];
+    uint16_t sign_sz = vs_secmodule_get_signature_len(sign->ec_type);
+    const uint8_t *signer_key = &sign->raw_sign_pubkey[sign_sz];
+    size_t signer_key_sz = vs_secmodule_get_pubkey_len(sign->ec_type);
+    STATUS_CHECK_RET(vs_provision_factory_present(signer_key, signer_key_sz), "Owner doesn't belong to ours Root of Trust");
+
     STATUS_CHECK_RET(vs_users_get_amount(VS_USER_OWNER, &users_amount), "Cannot get amount of device Owners");
 
     if (!users_amount) {
