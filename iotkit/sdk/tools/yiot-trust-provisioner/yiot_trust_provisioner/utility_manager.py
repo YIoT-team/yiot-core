@@ -947,12 +947,28 @@ class UtilityManager:
 
         # Prepare private keys
         self.__get_all_private_keys()
-        # - find Factory key
-        factory_keys = helpers.find_files(self.__key_storage_private_keys, "factory_")
+
+        # Choose factory
+        trust_list_pub_keys = self.__trust_list_pub_keys.get_all_data()
+        factory_keys_info = list()
+        for tl_list_key in trust_list_pub_keys:
+            if trust_list_pub_keys[tl_list_key]["type"] == "factory":
+                factory_keys_info.append(
+                    ["factory_name: {}".format(trust_list_pub_keys[tl_list_key]["comment"]), tl_list_key]
+                )
+
+        user_choice = self.__ui.choose_from_list(
+            factory_keys_info,
+            "Please choose Factory Key to delete: ",
+            "Factory Keys: "
+        )
+
+        factory_keys = helpers.find_files(self.__key_storage_private_keys, "factory_" + factory_keys_info[user_choice][1])
         if not factory_keys:
             self.__ui.print_error("Factory key needed for provision package not found. Please generate it.")
             return
         *_, factory_key = factory_keys
+
 
         # Prepare public keys
         self.__export_upper_level_pub_keys()
