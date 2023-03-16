@@ -133,6 +133,9 @@ vs_provision_get_slot_num(vs_provision_element_id_e id, uint16_t *slot) {
     case VS_PROVISION_SGNP:
         *slot = SIGNATURE_SLOT;
         return VS_CODE_OK;
+    case VS_PROVISION_LIC:
+        *slot = LICENSE_SLOT;
+        return VS_CODE_OK;
     default:
         VS_LOG_ERROR("Incorrect provision element %d", id);
         return VS_CODE_ERR_INCORRECT_ARGUMENT;
@@ -325,6 +328,9 @@ vs_provision_init(vs_storage_op_ctx_t *tl_storage_ctx,
 /******************************************************************************/
 vs_status_e
 vs_provision_update(void) {
+    if (_events_cb.update_cb) {
+        _events_cb.update_cb();
+    }
     return vs_provision_init(_tl_storage_ctx,
                              _secmodule,
                              _events_cb);
@@ -490,6 +496,41 @@ vs_provision_own_cert(vs_cert_t *cert,
     }
 
     return VS_CODE_OK;
+}
+
+/******************************************************************/
+vs_status_e
+vs_provision_factory_present(const uint8_t *raw_key, uint16_t raw_key_sz) {
+    vs_provision_tl_find_ctx_t search_ctx;
+    uint8_t *pubkey = NULL;
+    uint16_t pubkey_sz = 0;
+    uint8_t *meta = NULL;
+    uint16_t meta_sz;
+    vs_pubkey_dated_t *pubkey_dated = NULL;
+    bool key_present;
+
+    CHECK_NOT_ZERO_RET(raw_key, VS_CODE_ERR_NULLPTR_ARGUMENT);
+    CHECK_NOT_ZERO_RET(raw_key_sz, VS_CODE_ERR_ZERO_ARGUMENT);
+
+    // Find the first factory key
+    CHECK(VS_CODE_OK == vs_provision_tl_find_first_key(
+                                &search_ctx, VS_KEY_FACTORY, &pubkey_dated, &pubkey, &pubkey_sz, &meta, &meta_sz),
+          "Can't find the first factory key in TL");
+
+    do {
+        if (pubkey_sz == raw_key_sz && 0 == VS_IOT_MEMCMP(pubkey, raw_key, raw_key_sz)) {
+            return VS_CODE_OK;
+        }
+
+        // Try to find a next key
+        key_present = VS_CODE_OK ==
+                      vs_provision_tl_find_next_key(&search_ctx, &pubkey_dated, &pubkey, &pubkey_sz, &meta, &meta_sz);
+
+    } while (key_present);
+
+terminate:
+
+    return VS_CODE_ERR_NOT_FOUND;
 }
 
 /******************************************************************************/

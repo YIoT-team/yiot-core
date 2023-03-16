@@ -50,6 +50,7 @@
 
 #include "private/firmware-private.h"
 
+#if !YIOT_VERIFY_ONLY
 static const vs_key_type_e sign_rules_list[VS_FW_SIGNATURES_QTY] = VS_FW_SIGNER_TYPE_LIST;
 
 #define DESCRIPTORS_FILENAME "firmware_descriptors"
@@ -496,7 +497,7 @@ _is_rule_equal_to(vs_key_type_e type) {
     }
     return false;
 }
-
+#endif // !YIOT_VERIFY_ONLY
 /*************************************************************************/
 int
 vs_firmware_get_expected_footer_len(void) {
@@ -505,6 +506,7 @@ vs_firmware_get_expected_footer_len(void) {
     return sizeof(vs_firmware_footer_t) + VS_FW_SIGNATURES_QTY * (sizeof(vs_sign_t) + key_sz + sign_sz);
 }
 
+#if !YIOT_VERIFY_ONLY
 /*************************************************************************/
 vs_status_e
 vs_firmware_get_own_firmware_descriptor(vs_firmware_descriptor_t *descriptor) {
@@ -736,7 +738,7 @@ vs_firmware_install_firmware(const vs_firmware_descriptor_t *descriptor) {
 
     return ret_code;
 }
-
+#endif // !YIOT_VERIFY_ONLY
 /*************************************************************************/
 void
 vs_firmware_ntoh_descriptor(vs_firmware_descriptor_t *desc) {

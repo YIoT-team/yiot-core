@@ -46,14 +46,16 @@ VSQSnapInfoClientQml::VSQSnapInfoClientQml() {
 }
 
 void
-VSQSnapInfoClientQml::onNewDevice(const VSQDeviceInfo &deviceInfo) {
+VSQSnapInfoClientQml::onNewDevice(const struct VirgilIoTKit::vs_netif_t *src_netif, const VSQDeviceInfo &deviceInfo) {
     (void)deviceInfo;
+    (void)src_netif;
     beginInsertRows(QModelIndex(), rowCount() - 1, rowCount() - 1);
     endInsertRows();
 }
 
 void
-VSQSnapInfoClientQml::onDeviceInfo(const VSQDeviceInfo &deviceInfo) {
+VSQSnapInfoClientQml::onDeviceInfo(const struct VirgilIoTKit::vs_netif_t *src_netif, const VSQDeviceInfo &deviceInfo) {
+    (void)src_netif;
     const auto &devices = devicesList();
 
     for (int pos = 0; pos < devices.size(); ++pos) {

@@ -2,17 +2,21 @@ import io
 import os
 import shutil
 import sys
+import base64
 import json 
 from contextlib import contextmanager
 from typing import Union, Optional
-from datetime import datetime
+from datetime import datetime, timezone
+
 
 from hashlib import sha256
 from Cryptodome.Cipher import AES
 
 from yiot_trust_provisioner.core_utils import CRCCCITT
 from prettytable import PrettyTable
-from virgil_crypto import VirgilKeyPair
+from virgil_crypto import VirgilCrypto, VirgilKeyPair
+from virgil_crypto.hashes import HashAlgorithm
+from yiot_trust_provisioner.core_utils import VirgilSignExtractor
 
 from yiot_trust_provisioner import consts
 from yiot_trust_provisioner.core_utils.virgil_time import date_to_timestamp, timestamp_to_str
@@ -114,6 +118,24 @@ class UtilityManager:
                 expiration_date = date_to_timestamp(*expiration_date)
 
         return start_date, expiration_date
+
+    def __choose_expiry_timestamp(self, necessary: bool) -> int:
+        """
+        Ask user to enter expiration date for a license
+        :param necessary: if False - user can skip specifying dates
+        :return:          expiration timestamp
+        """
+        enter_expiration = self.__ui.get_user_input(
+            "Enter expiration date? [y/n]: ",
+            input_checker_callback=self.__ui.InputCheckers.yes_no_checker,
+            input_checker_msg="Allowed answers [y/n]. Please try again: ",
+            empty_allow=False
+        ).upper()
+        if enter_expiration == "Y":
+            self.__ui.print_message("Please choose expiration date for a license")
+            y, m, d = self.__ui.get_date()
+            return int(datetime(y, m, d, tzinfo=timezone.utc).timestamp())
+        return 0
 
     def __init_storage(self, name):
 
@@ -681,33 +703,32 @@ class UtilityManager:
         if not self._utility_list:
             self._utility_list = []
             self._utility_list.extend([
-                ["Initial Generation ({0} Recovery, {0} Auth, {0} TrustList, {0} Firmware, 1 Factory)"
-                    .format(self.__upper_level_keys_count), self.__generate_initial_keys],
-                ["---"],
-                ["Generate Recovery Key ({})".format(self.__upper_level_keys_count), self.__generate_recovery_by_count],
-                ["---"],
-                ["Generate Auth Key ({})".format(self.__upper_level_keys_count), self.__generate_auth_by_count],
-                ["---"],
-                ["Generate TrustList Key ({})".format(self.__upper_level_keys_count),
-                 self.__generate_tl_key_by_count],
+                ["Initial Generation", self.__generate_initial_keys],
+                # ["---"],
+                # ["Generate Recovery Key ({})".format(self.__upper_level_keys_count), self.__generate_recovery_by_count],
+                # ["---"],
+                # ["Generate Auth Key ({})".format(self.__upper_level_keys_count), self.__generate_auth_by_count],
+                # ["---"],
+                # ["Generate TrustList Key ({})".format(self.__upper_level_keys_count),
+                #  self.__generate_tl_key_by_count],
                 ["---"],
                 ["Generate Factory Key", self.__generate_factory_key],
                 ["Delete Factory Key", self.__delete_factory_key],
-                ["---"],
-                ["Generate Firmware Key ({})".format(self.__upper_level_keys_count), self.__generate_firmware_by_count],
+                # ["---"],
+                # ["Generate Firmware Key ({})".format(self.__upper_level_keys_count), self.__generate_firmware_by_count],
                 ["---"],
                 ["Generate TrustList", self.__generate_trust_list],
                 ["---"],
                 ["Print all Public Keys from db's", self.__print_all_pub_keys_db],
-                ["Add Public Key to db (Factory)", self.__manual_add_public_key],
+                # ["Add Public Key to db (Factory)", self.__manual_add_public_key],
                 ["---"],
                 ["Export data as provision package for Factory", self.__create_provision_pack],
                 ["Export upper level Public Keys", self.__export_upper_level_pub_keys],
                 ["Export Private Keys", self.__get_all_private_keys],
                 ["Export for YIoT app", self.__export_for_yiot],
                 ["---"],
-                ["Create Root User", self.__create_root_user],
-                ["Create customer credentials", self.__create_customer_cred],
+                # ["Create Root User", self.__create_root_user],
+                # ["Create customer credentials", self.__create_customer_cred],
                 ["Generate License", self.__generate_license],
                 ["---"],
                 ["Exit", self.__exit]
@@ -926,12 +947,28 @@ class UtilityManager:
 
         # Prepare private keys
         self.__get_all_private_keys()
-        # - find Factory key
-        factory_keys = helpers.find_files(self.__key_storage_private_keys, "factory_")
+
+        # Choose factory
+        trust_list_pub_keys = self.__trust_list_pub_keys.get_all_data()
+        factory_keys_info = list()
+        for tl_list_key in trust_list_pub_keys:
+            if trust_list_pub_keys[tl_list_key]["type"] == "factory":
+                factory_keys_info.append(
+                    ["factory_name: {}".format(trust_list_pub_keys[tl_list_key]["comment"]), tl_list_key]
+                )
+
+        user_choice = self.__ui.choose_from_list(
+            factory_keys_info,
+            "Please choose Factory Key to delete: ",
+            "Factory Keys: "
+        )
+
+        factory_keys = helpers.find_files(self.__key_storage_private_keys, "factory_" + factory_keys_info[user_choice][1])
         if not factory_keys:
             self.__ui.print_error("Factory key needed for provision package not found. Please generate it.")
             return
         *_, factory_key = factory_keys
+
 
         # Prepare public keys
         self.__export_upper_level_pub_keys()
@@ -977,24 +1014,57 @@ class UtilityManager:
     def __create_customer_cred(self):
         pass
 
+    def __device_lic_file(self, mac):
+        return os.path.join("/devices", mac + ".lic")
+
+    def __device_checker(self, user_input):
+        lic_file = self.__device_lic_file(user_input)
+        return os.path.isfile(lic_file)
+
+    def __lic_file(self, name):
+        return os.path.join("/credentials/licenses", name + ".json")
+
+    def __license_checker(self, user_input):
+        lic_file = self.__lic_file(user_input)
+        return os.path.isfile(lic_file)
+
     def __generate_license(self):
         self.__logger.info("License generation started")
 
-        # Enter comment
-        license_owner = self.__ui.get_user_input("Enter License Owner: ")
 
-        self.__ui.print_message("\nGenerating Key ...")
-
-        key_type = consts.VSKeyTypeS.LICENSE
-
-        private_keys_db, public_keys_db = self.__keys_type_to_storage_map[key_type]
-
-        # Prepare generator
-        key = self.key_chooser(
-            key_type, stage="License Key generation", is_new_key=True, suppress_db_warning=False
+        # Get device base license
+        mac = str(
+            self.__ui.get_user_input(
+                "Type device MAC address: ",
+                input_checker_callback=self.__device_checker,
+                input_checker_msg="Device is not registered. Please try again: ",
+                empty_allow=False
+            )
         )
-        if not key:
-            return
+
+
+        # Parse license to get device data
+        device_lic_file = self.__device_lic_file(mac)
+        f = open(device_lic_file, "r")
+        json_str = base64.b64decode(f.read())
+        j = json.loads(json_str)
+        lic_data = base64.b64decode(j["license"])
+        device_data_json = json.loads(lic_data)["device"]
+
+
+        # Get new license type
+        lic_type = str(
+            self.__ui.get_user_input(
+                "Type license data type: ",
+                input_checker_callback=self.__license_checker,
+                input_checker_msg="License type is not registered. Please try again: ",
+                empty_allow=False
+            )
+        )
+        lic_data_file = self.__lic_file(lic_type)
+        f = open(lic_data_file, "r")
+        extra_data_json = json.loads(f.read())
+
 
         # Get Factory key to sign
         key_for_sign = self.key_chooser(
@@ -1006,94 +1076,45 @@ class UtilityManager:
         if not key_for_sign:
             return
 
-        # Instances limit
-        instances_limit = self.__ui.get_user_input(
-            "Enter the Instances limit number from 1 to 4096: ",
-            input_checker_callback=self.__ui.InputCheckers.signature_input_check,
-            input_checker_msg="Only the number in range from 1 to 4096 is allowed. Please try again: ",
-            empty_allow=False
-            )
-        instances_limit = int(instances_limit)
 
-        # Get start/expiration date
-        start_date, expiration_date = self.__choose_dates_for_key(necessary=True)
+        # Get expiration timestamp
+        expiration_timestamp = self.__choose_expiry_timestamp(necessary=False)
 
-        # Generate
-        if not key.generate(
-                signature_limit=instances_limit,
-                signer_key=key_for_sign,
-                start_date=start_date,
-                expire_date=expiration_date
-        ):
-            self.__logger.info("License Key generation failed")
-            self.__ui.print_message("License Key generation failed")
-            return
 
-        # Save to db
-        # - prepare key info to be saved
-        key_info = {
-            "type": key_type.value,
-            "ec_type": key.ec_type_secmodule,
-            "start_date": start_date,
-            "expiration_date": expiration_date,
-            "comment": license_owner,
-            "key": key.public_key,
-            "meta_data": ""
-        }
+        # Prepare to be signed data
+        license_content = dict()
+        license_content["timestamp"] = int(datetime.now().timestamp())
+        license_content["device"] = device_data_json
+        license_content["data"] = extra_data_json
+        if expiration_timestamp != 0:
+            license_content["expire"] = expiration_timestamp
+        sign_json = json.dumps(license_content).encode('utf-8')
+        to_be_signed = to_b64(sign_json)
 
-        key_info["signature"] = key.signature
-        key_info["signer_key_id"] = key_for_sign.key_id
-        key_info["signer_hash_type"] = key_for_sign.hash_type_secmodule
 
-        # - public
-        public_keys_db.save(key.key_id, key_info, suppress_db_warning=False)
+        # Sign
+        d = to_b64(bytes(to_be_signed, 'utf-8'))
+        signature = key_for_sign.sign(d, long_sign=True)
 
-        # - private
-        key_info["key"] = key.private_key
-        if self._context.program_mode == ProgramModes.VIRGIL_CRYPTO_ONLY:
-            private_keys_db.save(key.key_id, key_info, suppress_db_warning=False)
+        # Build a final license
+        signed_license_content = dict()
+        signed_license_content["license"] = to_be_signed
+        signed_license_content["signature"] = signature
+        signed_lic_json = json.dumps(signed_license_content).encode('utf-8')
+        signed_lic_b64 = to_b64(signed_lic_json)
 
-        # Request password to encrypt private key
-        password = self.__request_password()
 
         # Save license
-        license_content = dict()
-        license_content["license_owner"] = license_owner
-        license_content["start_date"] = timestamp_to_str(start_date)
-        license_content["expiration_date"] = timestamp_to_str(expiration_date)
-        license_content["instances_limit"] = instances_limit
-
-        key_pair = dict()
-        key_pair["ec_type"] = key.ec_type_secmodule
-        key_pair["key_type"] = consts.key_type_str_to_num_map[key_type]
-
-        key_data = b64_to_bytes(key.private_key)
-        enc_key_data = self.__encrypt_with_password(key_data, password)
-        enc_key_data_b64 = to_b64(enc_key_data)
-
-        key_pair["encrypted_private"] = enc_key_data_b64
-        key_pair["public"] = key.public_key
-        license_content["key_pair"] = key_pair
-
-        signature = dict()
-        signature["data"] = key.signature
-        signature["signer_public_key"] = key_for_sign.public_key
-        signature["signer_hash_type"] = key_for_sign.hash_type_secmodule
-        license_content["signature"] = signature
-        json_object = json.dumps(license_content, indent = 4).encode('utf-8') 
-
         self.__ui.print_message("Saving License ...")
-        license_path = os.path.join(self.__license_storage_path, license_owner)
+        license_path = self.__license_storage_path
         os.makedirs(license_path, exist_ok=True)
 
         now = datetime.now()
-        dt_str = license_owner + "-" + now.strftime("%m_%d_%Y-%H:%M:%S") + ".lic"
+        dt_str = mac + "-" + now.strftime("%m_%d_%Y-%H:%M:%S") + ".lic"
         license_file = os.path.join(license_path, dt_str)
-        open(license_file, "wb").write(json_object)
+
+        open(license_file, "w").write(signed_lic_b64)
+
 
         # Finish
         self.__ui.print_message("Generation finished")
-        self.__logger.info("License generation completed. id: [{id}] owner: [{owner}] ".format(
-            id=key.key_id,
-            owner=license_owner
-        ))

@@ -52,7 +52,7 @@
 #include <endian-config.h>
 
 static vs_secmodule_impl_t *_secmodule = NULL;
-static vs_snap_scrt_server_service_t _impl = {};
+static vs_snap_scrt_server_service_t _impl = {NULL};
 static bool _scrt_service_ready = false;
 
 /******************************************************************/
@@ -91,9 +91,24 @@ _scrt_info_request_processor(const uint8_t *request,
 static vs_status_e
 _verify_owner_cert(const vs_cert_t *cert) {
     vs_status_e ret_code;
+    uint16_t users_amount = 0;
     char name[USER_NAME_SZ_MAX];
 
     STATUS_CHECK_RET(vs_crypto_hl_verify_cert(_secmodule, cert), "Wrong owner's certificate");
+
+    // Check if the same Root of trust. Factory key should be in TrustList
+    const vs_sign_t *sign = (vs_sign_t *)&cert->raw_cert[cert->key_sz];
+    uint16_t sign_sz = vs_secmodule_get_signature_len(sign->ec_type);
+    const uint8_t *signer_key = &sign->raw_sign_pubkey[sign_sz];
+    size_t signer_key_sz = vs_secmodule_get_pubkey_len(sign->ec_type);
+    STATUS_CHECK_RET(vs_provision_factory_present(signer_key, signer_key_sz), "Owner doesn't belong to ours Root of Trust");
+
+    STATUS_CHECK_RET(vs_users_get_amount(VS_USER_OWNER, &users_amount), "Cannot get amount of device Owners");
+
+    if (!users_amount) {
+        VS_LOG_DEBUG("There are no owners, so accept key request from unknown user");
+        return VS_CODE_OK;
+    }
 
     STATUS_CHECK_RET(vs_users_get_name(VS_USER_OWNER, (vs_pubkey_dated_t *)cert->raw_cert, name, USER_NAME_SZ_MAX),
                      "Cannot find required owner");
@@ -248,6 +263,10 @@ _scrt_add_user_request_processor(const uint8_t *request,
                                   (vs_pubkey_dated_t *)new_user_cert->raw_cert),
                      "Cannot add a new user");
 
+    if (_impl.users_update_cb) {
+        _impl.users_update_cb();
+    }
+
     return VS_CODE_OK;
 }
 
@@ -294,6 +313,10 @@ _scrt_remove_user_request_processor(const uint8_t *request,
     STATUS_CHECK_RET(vs_users_remove_by_name((vs_user_type_t)remove_user_info->user_type,
                                              (const char *)remove_user_info->rm_user_name),
                      "Cannot remove user");
+
+    if (_impl.users_update_cb) {
+        _impl.users_update_cb();
+    }
 
     return VS_CODE_OK;
 }
@@ -415,6 +438,8 @@ vs_snap_scrt_server(vs_secmodule_impl_t *secmodule, vs_snap_scrt_server_service_
     static vs_snap_service_t _scrt;
 
     CHECK_NOT_ZERO_RET(secmodule, NULL);
+
+    _impl = impl;
 
     if (!_scrt_service_ready) {
         _scrt_service_ready = true;

@@ -158,6 +158,7 @@ typedef enum {
     VS_PRVS_DEVI = HTONL_IN_COMPILE_TIME('DEVI'), /**< Get DEVice Info */
     VS_PRVS_ASAV = HTONL_IN_COMPILE_TIME('ASAV'), /**< Action SAVe provision */
     VS_PRVS_ASGN = HTONL_IN_COMPILE_TIME('ASGN'), /**< Action SiGN data */
+    VS_PRVS_LIC = HTONL_IN_COMPILE_TIME('_LIC'), /**< Set Device License */
 } vs_snap_prvs_element_e;
 #pragma GCC diagnostic pop
 
@@ -171,7 +172,8 @@ typedef enum {
     VS_PROVISION_PBT1 = VS_PRVS_PBT1,
     VS_PROVISION_PBT2 = VS_PRVS_PBT2,
     VS_PROVISION_PBF1 = VS_PRVS_PBF1,
-    VS_PROVISION_PBF2 = VS_PRVS_PBF2
+    VS_PROVISION_PBF2 = VS_PRVS_PBF2,
+    VS_PROVISION_LIC = VS_PRVS_LIC,
 } vs_provision_element_id_e;
 
 /** File version information */
@@ -210,12 +212,15 @@ typedef struct {
  */
 typedef void (*vs_file_ver_info_cb_t)(vs_file_version_t ver);
 
+typedef void (*vs_provision_update_cb_t)(void);
+
 /** Container of pointers to callback functions for Provision Events
  *
  * Fill required callbacks to receive information about different events of Provision module
  */
 typedef struct {
     vs_file_ver_info_cb_t tl_ver_info_cb;
+    vs_provision_update_cb_t update_cb;
 } vs_provision_events_t;
 
 #ifdef __cplusplus

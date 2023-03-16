@@ -55,6 +55,10 @@ extern "C" {
 /** Maximum data size of extended slot */
 #define KEY_SLOT_EXT_DATA_SIZE (1532)
 
+/** Maximum data size of license slot */
+#define KEY_SLOT_LIC_DATA_SIZE (10 * 1024)
+
+
 /** Slots identifiers */
 typedef enum {
     VS_KEY_SLOT_STD_OTP_0,
@@ -102,7 +106,8 @@ typedef enum {
     VS_KEY_SLOT_STD_TMP_6,
     VS_KEY_SLOT_STD_TMP_MAX,
     VS_KEY_SLOT_EXT_TMP_0,
-    VS_KEY_SLOT_TMP_MAX
+    VS_KEY_SLOT_TMP_MAX,
+    VS_KEY_SLOT_LICENSE
 } vs_iot_secmodule_slot_e;
 
 /** Provision keys amount */
@@ -133,6 +138,9 @@ typedef enum {
 #define FW1_KEY_SLOT VS_KEY_SLOT_STD_MTP_6
 /** Firmware key 2 slot */
 #define FW2_KEY_SLOT VS_KEY_SLOT_STD_MTP_7
+
+/** License slot */
+#define LICENSE_SLOT VS_KEY_SLOT_LICENSE
 
 #ifdef __cplusplus
 } // extern "C"

@@ -112,14 +112,21 @@ _json_str_to_float(jobj_t *jobj, jsontok_t *t, float *value) {
 /******************************************************************************/
 /* Converts the value held by the token into a null terminated string */
 static int
-_json_str_to_str(jobj_t *jobj, jsontok_t *t, char *value, int maxlen) {
-    if (!t || t->type != JSMN_STRING)
-        return -WM_E_JSON_INVALID_TYPE;
+_json_part_to_str(jobj_t *jobj, jsontok_t *t, char *value, int maxlen) {
     if ((t->end - t->start) >= maxlen)
         return -WM_E_JSON_NOMEM;
     VS_IOT_STRNCPY(value, jobj->js + t->start, t->end - t->start);
     value[t->end - t->start] = 0;
     return VS_JSON_ERR_OK;
+}
+
+/******************************************************************************/
+/* Converts the value held by the token into a null terminated string */
+static int
+_json_str_to_str(jobj_t *jobj, jsontok_t *t, char *value, int maxlen) {
+    if (!t || t->type != JSMN_STRING)
+        return -WM_E_JSON_INVALID_TYPE;
+    return _json_part_to_str(jobj, t, value, maxlen);
 }
 
 /******************************************************************************/
@@ -239,6 +246,16 @@ json_get_val_str(jobj_t *jobj, char *key, char *value, int maxlen) {
     if (ret != VS_JSON_ERR_OK)
         return ret;
     return _json_str_to_str(jobj, t, value, maxlen);
+}
+
+/******************************************************************************/
+int
+json_get_part_str(jobj_t *jobj, char *key, char *value, int maxlen) {
+    jsontok_t *t;
+    int ret = _json_get_value(jobj, key, &t);
+    if (ret != VS_JSON_ERR_OK)
+        return ret;
+    return _json_part_to_str(jobj, t, value, maxlen);
 }
 
 /******************************************************************************/

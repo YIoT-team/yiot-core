@@ -70,7 +70,6 @@ logger_hal_implementation
 
 #include <logger-config.h>
 #include <stdarg.h>
-#include <string.h>
 
 #ifdef __cplusplus
 namespace VirgilIoTKit {
@@ -111,8 +110,6 @@ typedef enum {
 
 #if VS_IOT_LOGGER_USE_LIBRARY
 
-#include <stdbool.h>
-#include <stdint.h>
 #include <stdlib-config.h>
 
 

@@ -46,6 +46,8 @@
 #include <virgil/iot/converters/crypto_format_converters.h>
 #include <virgil/iot/secmodule/secmodule.h>
 
+#define ECDSA_MAX_LEN (3 + 2 * (3 + MBEDTLS_ECP_MAX_BYTES))
+
 /******************************************************************************/
 static int
 _coord_sz(vs_secmodule_keypair_type_e keypair_type) {
@@ -100,7 +102,7 @@ _raw_ec_sign_to_mbedtls(vs_secmodule_keypair_type_e keypair_type,
     const int component_sz = _coord_sz(keypair_type);
     mbedtls_mpi r, s;
 
-    CHECK_BOOL_GOTO(buf_sz >= MBEDTLS_ECDSA_MAX_LEN, -1);
+    CHECK_BOOL_GOTO(buf_sz >= ECDSA_MAX_LEN, -1);
 
     mbedtls_mpi_init(&r);
     mbedtls_mpi_init(&s);

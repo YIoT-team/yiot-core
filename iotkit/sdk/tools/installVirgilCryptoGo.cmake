@@ -11,6 +11,6 @@ add_custom_command(
 )
 
 add_custom_target(virgil-crypto-go-install-deps
-        COMMAND env GOPATH=${GOPATH} ${DEPS_SH}
+        COMMAND env GOPATH=${GOPATH} GO111MODULE=off ${DEPS_SH}
         DEPENDS ${DEPS_SH}
         )

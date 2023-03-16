@@ -99,7 +99,7 @@ public:
     /** Default constructor */
     VSQNetifBase();
     VSQNetifBase(VSQNetifBase const &) = delete;
-    VSQNetifBase &
+    VSQNetifBase *
     operator=(VSQNetifBase const &) = delete;
 
     virtual ~VSQNetifBase() = default;

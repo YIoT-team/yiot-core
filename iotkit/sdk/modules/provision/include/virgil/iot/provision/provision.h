@@ -1,3 +1,22 @@
+//  ────────────────────────────────────────────────────────────
+//                     ╔╗  ╔╗ ╔══╗      ╔════╗
+//                     ║╚╗╔╝║ ╚╣╠╝      ║╔╗╔╗║
+//                     ╚╗╚╝╔╝  ║║  ╔══╗ ╚╝║║╚╝
+//                      ╚╗╔╝   ║║  ║╔╗║   ║║
+//                       ║║   ╔╣╠╗ ║╚╝║   ║║
+//                       ╚╝   ╚══╝ ╚══╝   ╚╝
+//    ╔╗╔═╗                    ╔╗                     ╔╗
+//    ║║║╔╝                   ╔╝╚╗                    ║║
+//    ║╚╝╝  ╔══╗ ╔══╗ ╔══╗  ╔╗╚╗╔╝  ╔══╗ ╔╗ ╔╗╔╗ ╔══╗ ║║  ╔══╗
+//    ║╔╗║  ║║═╣ ║║═╣ ║╔╗║  ╠╣ ║║   ║ ═╣ ╠╣ ║╚╝║ ║╔╗║ ║║  ║║═╣
+//    ║║║╚╗ ║║═╣ ║║═╣ ║╚╝║  ║║ ║╚╗  ╠═ ║ ║║ ║║║║ ║╚╝║ ║╚╗ ║║═╣
+//    ╚╝╚═╝ ╚══╝ ╚══╝ ║╔═╝  ╚╝ ╚═╝  ╚══╝ ╚╝ ╚╩╩╝ ║╔═╝ ╚═╝ ╚══╝
+//                    ║║                         ║║
+//                    ╚╝                         ╚╝
+//
+//    Lead Maintainer: Roman Kutashenko <kutashenko@gmail.com>
+//  ────────────────────────────────────────────────────────────
+
 //  Copyright (C) 2015-2020 Virgil Security, Inc.
 //
 //  All rights reserved.
@@ -233,6 +252,9 @@ vs_provision_tl_find_next_key(vs_provision_tl_find_ctx_t *search_ctx,
 vs_status_e
 vs_provision_own_cert(vs_cert_t *cert,
                       uint16_t buffer_sz);
+
+vs_status_e
+vs_provision_factory_present(const uint8_t *raw_key, uint16_t raw_key_sz);
 
 #ifdef __cplusplus
 } // extern "C"

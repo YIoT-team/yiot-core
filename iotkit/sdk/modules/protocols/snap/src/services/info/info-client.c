@@ -179,7 +179,8 @@ _snot_request_processor(const uint8_t *request,
 
 /******************************************************************************/
 static vs_status_e
-_ginf_request_processor(const uint8_t *request,
+_ginf_request_processor(const struct vs_netif_t *netif,
+                        const uint8_t *request,
                         const uint16_t request_sz,
                         uint8_t *response,
                         const uint16_t response_buf_sz,
@@ -228,7 +229,7 @@ _ginf_request_processor(const uint8_t *request,
     general_info.device_roles = ginf_request->device_roles;
 
     // Invoke callback function
-    _impl.general_info(&general_info);
+    _impl.general_info(netif, &general_info);
 
     *response_sz = 0;
 
@@ -330,7 +331,7 @@ _info_client_request_processor(const struct vs_netif_t *netif,
         return VS_CODE_COMMAND_NO_RESPONSE;
 
     case VS_INFO_GINF:
-        res = _ginf_request_processor(request, request_sz, response, response_buf_sz, response_sz);
+        res = _ginf_request_processor(netif, request, request_sz, response, response_buf_sz, response_sz);
         break;
 
     case VS_INFO_STAT:

@@ -83,7 +83,7 @@ vs_wait_func(uint32_t wait_ms, int *condition, int idle) {
 
     // Check for expected condition
     if (*condition != idle) {
-        return 0;
+        return VS_CODE_OK;
     }
 
     // Wait for expected condition
@@ -102,7 +102,7 @@ vs_wait_func(uint32_t wait_ms, int *condition, int idle) {
 
     pthread_mutex_unlock(&_wait_mutex);
 
-    return VS_CODE_OK;
+    return (*condition != idle) ? VS_CODE_OK : VS_CODE_COMMAND_NO_RESPONSE;
 }
 
 /******************************************************************************/

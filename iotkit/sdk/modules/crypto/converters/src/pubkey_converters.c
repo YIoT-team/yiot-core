@@ -150,6 +150,7 @@ terminate:
 }
 
 /******************************************************************************/
+#if !YIOT_TINY_CONFIG
 static bool
 _keypair_25519_key_to_internal(vs_secmodule_keypair_type_e keypair_type,
                                const uint8_t *public_key_in,
@@ -194,7 +195,7 @@ _keypair_25519_key_to_internal(vs_secmodule_keypair_type_e keypair_type,
 
     return true;
 }
-
+#endif // !YIOT_TINY_CONFIG
 /******************************************************************************/
 bool
 vs_converters_pubkey_to_raw(vs_secmodule_keypair_type_e keypair_type,
@@ -234,11 +235,13 @@ vs_converters_pubkey_to_virgil(vs_secmodule_keypair_type_e keypair_type,
                                uint8_t *public_key_out,
                                uint16_t buf_sz,
                                uint16_t *public_key_out_sz) {
+#if !YIOT_TINY_CONFIG
     if (VS_KEYPAIR_EC_CURVE25519 == keypair_type || VS_KEYPAIR_EC_ED25519 == keypair_type) {
         return _keypair_25519_key_to_internal(
                 keypair_type, public_key_in, public_key_in_sz, public_key_out, buf_sz, public_key_out_sz);
-    } else {
-        return _keypair_ec_key_to_internal(
-                keypair_type, public_key_in, public_key_in_sz, public_key_out, buf_sz, public_key_out_sz);
     }
+#endif // !YIOT_TINY_CONFIG
+
+    return _keypair_ec_key_to_internal(
+            keypair_type, public_key_in, public_key_in_sz, public_key_out, buf_sz, public_key_out_sz);
 }

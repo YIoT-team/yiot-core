@@ -166,7 +166,7 @@ typedef vs_status_e (*vs_snap_info_start_notif_cb_t)(vs_snap_info_device_t *devi
  *
  * \return #VS_CODE_OK in case of success or error code.
  */
-typedef vs_status_e (*vs_snap_info_general_cb_t)(vs_info_general_t *general_info);
+typedef vs_status_e (*vs_snap_info_general_cb_t)(const struct vs_netif_t *src_netif, vs_info_general_t *general_info);
 
 /** Device statistics request
  *

@@ -64,7 +64,7 @@ VSQSnapInfoClient::VSQSnapInfoClient() {
 
 vs_status_e
 VSQSnapInfoClient::startNotify(vs_snap_info_device_t *deviceRaw) {
-    VSQDeviceInfo &device = instance().getDevice(deviceRaw->mac);
+    VSQDeviceInfo &device = instance().getDevice(nullptr, deviceRaw->mac);
 
     device.m_hasGeneralInfo = false;
     device.m_hasStatistics = false;
@@ -75,7 +75,7 @@ VSQSnapInfoClient::startNotify(vs_snap_info_device_t *deviceRaw) {
     VS_LOG_INFO("New device : MAC %s", VSQCString(device.m_mac.description()));
 #endif
 
-    emit instance().fireDeviceInfo(device);
+    emit instance().fireDeviceInfo(nullptr, device);
 
     if (!instance().onStartFullPolling(device.m_mac)) {
         VS_LOG_CRITICAL("Unable to start polling for device %s", VSQCString(device.m_mac.description()));
@@ -86,20 +86,14 @@ VSQSnapInfoClient::startNotify(vs_snap_info_device_t *deviceRaw) {
 }
 
 vs_status_e
-VSQSnapInfoClient::generalInfo(vs_info_general_t *generalData) {
-    VSQDeviceInfo &device = instance().getDevice(generalData->default_netif_mac);
-    bool changed = false;
+VSQSnapInfoClient::generalInfo(const struct VirgilIoTKit::vs_netif_t *src_netif, vs_info_general_t *generalData) {
+    VSQDeviceInfo &device = instance().getDevice(src_netif, generalData->default_netif_mac);
 
-    auto copyAndCheck = [&changed](auto &dst, const auto &src) {
-        changed = !dst.equal(src);
-        dst = src;
-    };
-
-    copyAndCheck(device.m_manufactureId, generalData->manufacture_id);
-    copyAndCheck(device.m_deviceType, generalData->device_type);
-    copyAndCheck(device.m_deviceRoles, generalData->device_roles);
-    copyAndCheck(device.m_fwVer, generalData->fw_ver);
-    copyAndCheck(device.m_tlVer, generalData->tl_ver);
+    device.m_manufactureId = generalData->manufacture_id;
+    device.m_deviceType = generalData->device_type;
+    device.m_deviceRoles = generalData->device_roles;
+    device.m_fwVer = generalData->fw_ver;
+    device.m_tlVer = generalData->tl_ver;
 
     auto rawName = reinterpret_cast<char*>(generalData->name);
     device.m_deviceName = QString::fromUtf8(rawName, strnlen(rawName, DEVICE_NAME_SZ_MAX));
@@ -108,34 +102,18 @@ VSQSnapInfoClient::generalInfo(vs_info_general_t *generalData) {
     device.m_hasOwner = generalData->has_owner;
     device.m_needConnectionCreds = generalData->need_connection_creds;
 
-#if defined(LOG_GENERAL_INFO)
-    if (changed) {
-        VS_LOG_DEBUG(
-                "Device general info : MAC %s, manufacture ID \"%s\", device type \"%s\", device role(s) \"%s\", "
-                "Firmware version \"%s\", TrustList version \"%s\"",
-                VSQCString(device.m_mac.description()),
-                VSQCString(device.m_manufactureId.description()),
-                VSQCString(device.m_deviceType.description()),
-                VSQCString(device.m_deviceRoles.description()),
-                VSQCString(device.m_fwVer.description()),
-                VSQCString(device.m_tlVer.description()));
-    }
-#else
-    (void)changed;
-#endif
-
     device.m_isActive = true;
     device.m_hasGeneralInfo = true;
     device.m_lastTimestamp = QDateTime::currentDateTime();
 
-    emit instance().fireDeviceInfo(device);
+    emit instance().fireDeviceInfo(src_netif, device);
 
     return VS_CODE_OK;
 }
 
 vs_status_e
 VSQSnapInfoClient::statistics(vs_info_statistics_t *statistics) {
-    VSQDeviceInfo &device = instance().getDevice(statistics->default_netif_mac);
+    VSQDeviceInfo &device = instance().getDevice(nullptr, statistics->default_netif_mac);
 
     device.m_sent = statistics->sent;
     device.m_received = statistics->received;
@@ -151,7 +129,7 @@ VSQSnapInfoClient::statistics(vs_info_statistics_t *statistics) {
                  device.m_received);
 #endif
 
-    emit instance().fireDeviceInfo(device);
+    emit instance().fireDeviceInfo(nullptr, device);
 
     return VS_CODE_OK;
 }
@@ -183,7 +161,7 @@ VSQSnapInfoClient::changePolling(std::initializer_list<EPolling> pollingOptions,
 }
 
 VSQDeviceInfo &
-VSQSnapInfoClient::getDevice(const VSQMac &mac) {
+VSQSnapInfoClient::getDevice(const struct VirgilIoTKit::vs_netif_t *src_netif, const VSQMac &mac) {
     VSQDeviceInfo *device = nullptr;
 
     for (auto &curDevice : m_devicesInfo) {
@@ -196,7 +174,7 @@ VSQSnapInfoClient::getDevice(const VSQMac &mac) {
     if (!device) {
         m_devicesInfo.push_back(VSQDeviceInfo(mac));
         device = &m_devicesInfo.last();
-        emit fireNewDevice(*device);
+        emit fireNewDevice(src_netif, *device);
     }
 
     return *device;
@@ -223,7 +201,7 @@ VSQSnapInfoClient::timerEvent(QTimerEvent *event) {
                 VS_LOG_INFO("Dead device : MAC %s", VSQCString(device.m_mac.description()));
 #endif
                 device.m_isActive = false;
-                emit fireDeviceInfo(device);
+                emit fireDeviceInfo(nullptr, device);
             }
         }
     }

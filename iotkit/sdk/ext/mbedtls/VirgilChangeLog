@@ -1,0 +1,40 @@
+Virgil Security ChangeLog (Sorted per version, date)
+
+= Virgil Security 2.0.4 released 2018-02-01
+
+Bugfix
+  * Fix memory leaks in the ECIES algorithm
+  * Fix memory leaks when parse PKCS#8 encrypted key without password
+
+
+= Virgil Security 2.0.3 released 2016-03-22
+
+Bugfix
+  * Fix MSVC warnings
+
+
+= Virgil Security 2.0.2 released 2016-03-22
+
+Bugfix
+  * Update to mbed TLS version 2.4.2
+  * Return error MBEDTLS_ERR_PK_PASSWORD_REQUIRED if private key is really encrypted
+
+
+= Virgil Security 2.0.1 released 2016-12-07
+
+Changes
+  * Update to mbed TLS version 2.4.0
+  * Replace custom implementation of support ASN.1 encoding of negative integers and integers larger than 255,
+    by applying commit https://github.com/sg2342/mbedtls/commit/b684c0ee0746c05a8e8896283ef90a09d1d0bf9d
+
+
+= Virgil Security 2.0.0 released 2016-09-30
+
+Features
+  * Implement Ed25519 and X25519 key parse and key write [draft-ietf-curdle-pkix-01]
+  * Implement EdDSA [draft-irtf-cfrg-eddsa-08]
+  * Implement X25519 [RFC7748]
+  * Add AMD64 optimizations for Ed25519 library
+
+Changes
+  * Make ECIES algorithm agnostic to a PK keypair
