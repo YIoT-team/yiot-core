@@ -1,33 +1,27 @@
 ################################################################
 #                                                              #
-#                 Dockerfile for YIoT emulator                 #
+#                 Dockerfile for YIoT tools                 #
 #                                                              #
 ################################################################
 
-FROM centos:8
+FROM quay.io/centos/centos:stream9
 
-LABEL maintainer="support@yiot-dev.io" name="iotkit tools (based on Centos 8)" vendor="" license="GPLv2" build-date="20210610" version="0.2.0"
+LABEL maintainer="support@yiot.dev" name="YIoT tools (based on Centos 9)" vendor="" license="GPLv2" build-date="20230320" version="0.2.1"
 
 ########################################################
 #                        INSTALLING                    #
 ########################################################
 
-RUN cd /etc/yum.repos.d/
-RUN sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-RUN sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
-
-
 RUN yum clean all && yum -y update &&\
     yum -y install epel-release &&\
     yum clean all
 
-ADD python3-PyCRC-*.el8.noarch.rpm         /tmp
-ADD python3-tinydb-*.el8.noarch.rpm        /tmp
-ADD python3-virgil-crypto-*.el8.x86_64.rpm /tmp
-ADD python3-virgil-sdk-*.el8.noarch.rpm    /tmp
-ADD yiot-iotkit-tools-*.el8.x86_64.rpm   /tmp
+ADD python3-PyCRC-*.el9.noarch.rpm         /tmp
+ADD python3-tinydb-*.el9.noarch.rpm        /tmp
+ADD python3-virgil-crypto-*.el9.x86_64.rpm /tmp
+ADD python3-virgil-sdk-*.el9.noarch.rpm    /tmp
+ADD yiot-iotkit-tools-*.el9.x86_64.rpm   /tmp
 
 RUN yum -y install /tmp/*.rpm && rm -rf /tmp/*
+RUN /usr/libexec/platform-python -m ensurepip
 RUN /usr/libexec/platform-python -m pip install pycryptodomex
-
-

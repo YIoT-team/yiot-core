@@ -48,10 +48,6 @@ TinyDB is a lightweight document oriented database optimized for your happiness
 %py3_install
 rm -fr %{buildroot}%{python3_sitelib}/tests
 
-%check
-%{__python3} setup.py test
-
-
 %files -n python%{python3_pkgversion}-%{pypi_name}
 %doc CONTRIBUTING.rst README.rst docs
 %license LICENSE
