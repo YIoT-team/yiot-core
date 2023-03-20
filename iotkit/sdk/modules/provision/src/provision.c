@@ -426,15 +426,14 @@ vs_provision_tl_find_next_key(vs_provision_tl_find_ctx_t *search_ctx,
         if ((*pubkey_dated)->pubkey.key_type != search_ctx->key_type) {
             continue;
         }
-        if (element.index >= search_ctx->last_pos) {
-            *meta_sz = VS_IOT_NTOHS((*pubkey_dated)->pubkey.meta_data_sz);
-            *meta = (*pubkey_dated)->pubkey.meta_and_pubkey;
-            *pubkey_sz = vs_secmodule_get_pubkey_len((*pubkey_dated)->pubkey.ec_type);
-            *pubkey = &(*pubkey_dated)->pubkey.meta_and_pubkey[*meta_sz];
-            res = VS_CODE_OK;
-            search_ctx->last_pos = element.index;
-            break;
-        }
+
+        *meta_sz = VS_IOT_NTOHS((*pubkey_dated)->pubkey.meta_data_sz);
+        *meta = (*pubkey_dated)->pubkey.meta_and_pubkey;
+        *pubkey_sz = vs_secmodule_get_pubkey_len((*pubkey_dated)->pubkey.ec_type);
+        *pubkey = &(*pubkey_dated)->pubkey.meta_and_pubkey[*meta_sz];
+        res = VS_CODE_OK;
+        search_ctx->last_pos = element.index - 1;
+        break;
     }
 
     return res;
