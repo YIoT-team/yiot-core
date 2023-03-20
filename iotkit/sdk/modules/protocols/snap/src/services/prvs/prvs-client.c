@@ -56,7 +56,7 @@ static vs_snap_prvs_dnid_list_t *_prvs_dnid_list = 0;
 static vs_snap_prvs_client_impl_t _prvs_impl = {0, 0};
 
 // Last result
-#define PRVS_BUF_SZ (1024)
+#define PRVS_BUF_SZ (1024 * 10)
 static volatile vs_status_e _last_res = VS_CODE_ERR_PRVS_UNKNOWN;
 static volatile uint16_t _last_data_sz = 0;
 static volatile uint8_t _last_data[PRVS_BUF_SZ];
