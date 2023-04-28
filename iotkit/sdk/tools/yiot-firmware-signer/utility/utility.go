@@ -45,7 +45,7 @@ type YIoTManifest struct {
 	Version      string                 `json:"version"`
 	Timestamp    int64                  `json:"timestamp"`
 	Firmware     string                 `json:"firmware"`
-	Signature    string                 `json:"signanure"`
+	Signature    string                 `json:"signature"`
 	ExtaraData   map[string]interface{} `json:"extra_data"`
 }
 
