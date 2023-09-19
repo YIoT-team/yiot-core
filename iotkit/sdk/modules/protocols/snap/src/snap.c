@@ -49,9 +49,10 @@
 static vs_netif_t *_netifs[VS_SNAP_NETIF_MAX];
 static size_t _netifs_cnt = 0;
 
-#define RESPONSE_SZ_MAX (1024)
+#define RESPONSE_SZ_MAX (1024 * 10)
 #define RESPONSE_RESERVED_SZ (sizeof(vs_snap_packet_t))
 #define SERVICES_CNT_MAX (10)
+
 static const vs_snap_service_t *_snap_services[SERVICES_CNT_MAX];
 static uint32_t _snap_services_num = 0;
 static vs_mac_addr_t _snap_broadcast_mac = {.bytes = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}};

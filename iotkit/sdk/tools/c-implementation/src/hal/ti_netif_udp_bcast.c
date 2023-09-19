@@ -74,7 +74,7 @@ static in_addr_t _dst_addr = INADDR_BROADCAST;
 
 #define UDP_BCAST_PORT (4100)
 
-#define RX_BUF_SZ (2048)
+#define RX_BUF_SZ (64 * 1024)
 
 /******************************************************************************/
 static void *

@@ -1,311 +1,184 @@
-//   Copyright (C) 2015-2019 Virgil Security Inc.
+//  ────────────────────────────────────────────────────────────
+//                     ╔╗  ╔╗ ╔══╗      ╔════╗
+//                     ║╚╗╔╝║ ╚╣╠╝      ║╔╗╔╗║
+//                     ╚╗╚╝╔╝  ║║  ╔══╗ ╚╝║║╚╝
+//                      ╚╗╔╝   ║║  ║╔╗║   ║║
+//                       ║║   ╔╣╠╗ ║╚╝║   ║║
+//                       ╚╝   ╚══╝ ╚══╝   ╚╝
+//    ╔╗╔═╗                    ╔╗                     ╔╗
+//    ║║║╔╝                   ╔╝╚╗                    ║║
+//    ║╚╝╝  ╔══╗ ╔══╗ ╔══╗  ╔╗╚╗╔╝  ╔══╗ ╔╗ ╔╗╔╗ ╔══╗ ║║  ╔══╗
+//    ║╔╗║  ║║═╣ ║║═╣ ║╔╗║  ╠╣ ║║   ║ ═╣ ╠╣ ║╚╝║ ║╔╗║ ║║  ║║═╣
+//    ║║║╚╗ ║║═╣ ║║═╣ ║╚╝║  ║║ ║╚╗  ╠═ ║ ║║ ║║║║ ║╚╝║ ║╚╗ ║║═╣
+//    ╚╝╚═╝ ╚══╝ ╚══╝ ║╔═╝  ╚╝ ╚═╝  ╚══╝ ╚╝ ╚╩╩╝ ║╔═╝ ╚═╝ ╚══╝
+//                    ║║                         ║║
+//                    ╚╝                         ╚╝
 //
-//   All rights reserved.
-//
-//   Redistribution and use in source and binary forms, with or without
-//   modification, are permitted provided that the following conditions are
-//   met:
-//
-//       (1) Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
-//
-//       (2) Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in
-//       the documentation and/or other materials provided with the
-//       distribution.
-//
-//       (3) Neither the name of the copyright holder nor the names of its
-//       contributors may be used to endorse or promote products derived from
-//       this software without specific prior written permission.
-//
-//   THIS SOFTWARE IS PROVIDED BY THE AUTHOR ''AS IS'' AND ANY EXPRESS OR
-//   IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-//   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-//   DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
-//   INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-//   (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-//   SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-//   HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-//   STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
-//   IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-//   POSSIBILITY OF SUCH DAMAGE.
-//
-//   Lead Maintainer: Virgil Security Inc. <support@virgilsecurity.com>
+//    Lead Maintainer: Roman Kutashenko <kutashenko@gmail.com>
+//  ────────────────────────────────────────────────────────────
 
 package utility
 
 import (
-	"bytes"
-	"encoding/binary"
+	"bufio"
+	b64 "encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
+	"os/exec"
+	"path"
 	"time"
 
-	"../converters"
 	"../firmware"
 	"../signers"
 )
 
-const (
-	TIME_OFFSET = 1420070400 // 01/01/2015 @ 12:00am (UTC)
-)
+// ----------------------------------------------------------------------------
+//
+// Manifest structure
+//
+type YIoTManifest struct {
+	Manufacturer string                 `json:"manufacturer"`
+	Device       string                 `json:"device"`
+	Model        string                 `json:"model"`
+	Version      string                 `json:"version"`
+	Timestamp    int64                  `json:"timestamp"`
+	Firmware     string                 `json:"firmware"`
+	Signature    string                 `json:"signature"`
+	ExtaraData   map[string]interface{} `json:"extra_data"`
+}
+
+// ----------------------------------------------------------------------------
+//
+// Signed Manifest structure
+//
+type YIoTSignedManifest struct {
+	Manifest  string `json:"manifest"`
+	Signature string `json:"signature"`
+}
 
 type SignerUtility struct {
-	Signer          signers.SignerInterface
-	FirmwarePath    string
-	ProgFileSize    int
-	FirmwareVersion string
-	Manufacturer    string
-	Model           string
-	ChunkSize       int
+	PrivateKeyPath   string
+	BaseManifestPath string
+	DestinationPath  string
+	FirmwarePath     string
+	FirmwareVersion  string
+	Manufacturer     string
+	Device           string
+	Model            string
 
 	progFile *firmware.ProgFile
 }
 
+func _readFile(filename string) ([]byte, error) {
+	file, err := os.Open(filename)
+
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	stats, statsErr := file.Stat()
+	if statsErr != nil {
+		return nil, statsErr
+	}
+
+	var size int64 = stats.Size()
+	bytes := make([]byte, size)
+
+	bufr := bufio.NewReader(file)
+	_, err = bufr.Read(bytes)
+
+	return bytes, err
+}
+
 func (s *SignerUtility) CreateSignedFirmware() (err error) {
-	fwPath := s.FirmwarePath
-	fwPathNoExtension := strings.TrimSuffix(fwPath, filepath.Ext(fwPath))
-	progFilePath := fwPathNoExtension + "_Prog.bin"
-	updateFilePath := fwPathNoExtension + "_Update.bin"
 
-	// Create _Prog file
-	if err = s.createProgFile(progFilePath); err != nil {
-		return fmt.Errorf("failed to create _Prog file: %v", err)
+	// Read firmware data
+	d, err := _readFile(s.FirmwarePath)
+	if err != nil {
+		return fmt.Errorf("Cannot read %s", s.FirmwarePath)
 	}
 
-	// Create _Update file
-	if err = s.createUpdateFile(updateFilePath); err != nil {
-		return fmt.Errorf("failed to create _Update file: %v", err)
+	// Sign firmware
+	sign, err := signers.Sign(d, s.PrivateKeyPath)
+	if err != nil {
+		return err
+	}
+
+	// Prepare a new firmware name
+	name := fmt.Sprintf("%s-%s-%s-%s-%s", s.Manufacturer, s.Device, s.Model, s.FirmwareVersion, path.Base(s.FirmwarePath))
+
+	// Read Base manifest
+	bm, err := _readFile(s.BaseManifestPath)
+	if err != nil {
+		return fmt.Errorf("Cannot read %s", s.BaseManifestPath)
+	}
+	var bmMap map[string]interface{}
+	if err := json.Unmarshal(bm, &bmMap); err != nil {
+		return err
+	}
+
+	// Prepare manifest
+	manifest := YIoTManifest{
+		Manufacturer: s.Manufacturer,
+		Device:       s.Device,
+		Model:        s.Model,
+		Version:      s.FirmwareVersion,
+		Timestamp:    time.Now().Unix(),
+		Firmware:     name,
+		Signature:    b64.StdEncoding.EncodeToString(sign),
+		ExtaraData:   bmMap,
+	}
+
+	// Internal manifest data
+	m, err := json.Marshal(manifest)
+	if err != nil {
+		return err
+	}
+	internalManifest := string(m)
+	println(internalManifest)
+	internalManifestBase64 := b64.StdEncoding.EncodeToString([]byte(internalManifest))
+
+	// Sign manifest
+	signManifest, err := signers.Sign([]byte(internalManifestBase64), s.PrivateKeyPath)
+	if err != nil {
+		return err
+	}
+
+	// Prepare signed manifest
+	signedManifest := YIoTSignedManifest{
+		Manifest:  internalManifestBase64,
+		Signature: b64.StdEncoding.EncodeToString([]byte(signManifest)),
+	}
+
+	// Signed manifest data
+	sm, err := json.Marshal(signedManifest)
+	if err != nil {
+		return err
+	}
+	signedManifestStr := string(sm)
+	println(signedManifestStr)
+
+	// Create folders structure
+	dstPath := path.Join(s.DestinationPath, s.Manufacturer, s.Device, s.Model, s.FirmwareVersion)
+	os.MkdirAll(dstPath, os.ModePerm)
+
+	// Copy firmware binary
+	dstFirmware := path.Join(dstPath, name)
+	cpCmd := exec.Command("cp", "-f", s.FirmwarePath, dstFirmware)
+	err = cpCmd.Run()
+	if err != nil {
+		return fmt.Errorf("Cannot copy firmware file %s -> %s", s.FirmwarePath, dstFirmware)
+	}
+
+	// Save Signed manifest
+	dstManifest := path.Join(dstPath, "manifest.json")
+	err = ioutil.WriteFile(dstManifest, sm, 0644)
+	if err != nil {
+		return fmt.Errorf("Cannot save manifest %s", dstManifest)
 	}
 
 	return nil
-}
-
-func (s *SignerUtility) createProgFile(filePath string) error {
-	progBuf := new(bytes.Buffer)
-
-	// FW code
-	fmt.Println("\nStart creation of _Prog file")
-	firmwareBytesWithoutSign, err := ioutil.ReadFile(s.FirmwarePath)
-	if err != nil {
-		return err
-	}
-
-	// Write to firmware code to buf
-	if err := binary.Write(progBuf, binary.BigEndian, firmwareBytesWithoutSign); err != nil {
-		return err
-	}
-
-	// Calculate filler length
-	fillerLength := s.calculateFillerSize(firmwareBytesWithoutSign)
-	fmt.Printf("0xFF (filler) section length: %d bytes\n", fillerLength)
-
-	// Filler
-	var filler []byte
-	for i := 0; i < fillerLength; i++ {
-		filler = append(filler, 0xFF)
-	}
-
-	// Write filler to buffer
-	if err := binary.Write(progBuf, binary.BigEndian, filler); err != nil {
-		return err
-	}
-
-	// Footer
-	footer := new(firmware.Footer)
-	// - signatures count
-	signaturesCount := uint8(len(s.Signer.SignerKeyEcTypes()))
-	footer.SignaturesCount = signaturesCount
-	// - descriptor
-	version, err := s.prepareVersion()
-	if err != nil {
-		return err
-	}
-
-	descriptor := new(firmware.Descriptor)
-	copy(descriptor.ManufactureID[:], s.Manufacturer)
-	copy(descriptor.DeviceType[:], s.Model)
-	descriptor.Version = version
-	descriptor.Padding = 0x00
-	descriptor.ChunkSize = uint16(s.ChunkSize)
-	descriptor.FirmwareLength = uint32(len(firmwareBytesWithoutSign))
-	descriptor.AppSize = uint32(s.ProgFileSize)
-
-	footer.Descriptor = *descriptor
-	fmt.Printf("Descriptor prepared: %+v\n", footer.Descriptor)
-
-	// Write Footer meta to buffer
-	if err := binary.Write(progBuf, binary.BigEndian, signaturesCount); err != nil {
-		return err
-	}
-	if err := binary.Write(progBuf, binary.BigEndian, footer.Descriptor); err != nil {
-		return err
-	}
-
-	// Prepare signatures
-	signatures, err := s.Signer.Sign(progBuf.Bytes())
-	if err != nil {
-		return err
-	}
-	footer.Signatures = signatures
-
-	// Write signatures to buffer
-	for _, signature := range footer.Signatures {
-		signatureBytes, err := signature.ToBytes()
-		if err != nil {
-			return err
-		}
-		if err := binary.Write(progBuf, binary.BigEndian, signatureBytes); err != nil {
-			return err
-		}
-	}
-
-	// Save to file
-	if err := saveBufferToFile(progBuf, filePath); err != nil {
-		return err
-	}
-
-	// Save struct for further usage
-	progFile := new(firmware.ProgFile)
-	progFile.FirmwareCode = firmwareBytesWithoutSign
-	progFile.Filler = filler
-	progFile.Footer = *footer
-	s.progFile = progFile
-
-	return nil
-}
-
-func (s *SignerUtility) createUpdateFile(filePath string) error {
-	fmt.Println("\nStart creation of _Update file")
-	updateBuf := new(bytes.Buffer)
-
-	// Header
-	fwLength := len(s.progFile.FirmwareCode)
-	footerLen := s.calculateFooterSize()
-	header := firmware.Header{
-		CodeOffset:      firmware.HEADER_SIZE,
-		CodeLength:      uint32(fwLength),
-		FooterOffset:    uint32(firmware.HEADER_SIZE + fwLength),
-		FooterLength:    uint32(footerLen),
-		SignaturesCount: s.progFile.Footer.SignaturesCount,
-		Descriptor:      s.progFile.Footer.Descriptor,
-	}
-	fmt.Printf("Header prepared: %+v\n", header)
-
-	// Write header to buffer
-	if err := binary.Write(updateBuf, binary.BigEndian, header); err != nil {
-		return err
-	}
-
-	// Write FW code to buffer
-	if err := binary.Write(updateBuf, binary.BigEndian, s.progFile.FirmwareCode); err != nil {
-		return err
-	}
-
-	// Write Footer meta to buffer
-	if err := binary.Write(updateBuf, binary.BigEndian, s.progFile.Footer.SignaturesCount); err != nil {
-		return err
-	}
-	if err := binary.Write(updateBuf, binary.BigEndian, s.progFile.Footer.Descriptor); err != nil {
-		return err
-	}
-
-	// Write signatures to buffer
-	for _, signature := range s.progFile.Footer.Signatures {
-		signatureBytes, err := signature.ToBytes()
-		if err != nil {
-			return err
-		}
-		if err := binary.Write(updateBuf, binary.BigEndian, signatureBytes); err != nil {
-			return err
-		}
-	}
-
-	// Save to file
-	if err := saveBufferToFile(updateBuf, filePath); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *SignerUtility) prepareVersion() (ver firmware.Version, err error) {
-	// Version parts
-	versionParts := strings.Split(s.FirmwareVersion, ".")
-	if len(versionParts) != 4 {
-		return ver, fmt.Errorf("version parts amount is not 4: %s", versionParts)
-	}
-
-	major, err := stringToUint8(versionParts[0])
-	if err != nil {
-		return ver, err
-	}
-	minor, err := stringToUint8(versionParts[1])
-	if err != nil {
-		return ver, err
-	}
-	patch, err := stringToUint8(versionParts[2])
-	if err != nil {
-		return ver, err
-	}
-	build, err := stringToUint32(versionParts[3])
-	if err != nil {
-		return ver, err
-	}
-	// Timestamp
-	currentTime := time.Now().UTC().Unix()
-	timestamp := uint32(currentTime - TIME_OFFSET)
-
-	ver = firmware.Version{
-		Major:     major,
-		Minor:     minor,
-		Patch:     patch,
-		Build:     build,
-		Timestamp: timestamp,
-	}
-
-	return ver, nil
-}
-
-func (s *SignerUtility) calculateFooterSize() int {
-	footerSize := firmware.FOOTER_META_SIZE
-	for _, ecType := range s.Signer.SignerKeyEcTypes() {
-		footerSize += firmware.SIGNATURE_META_SIZE                // meta in signature block
-		footerSize += converters.GetSignatureSizeByECType(ecType) // signature
-		footerSize += converters.GetPublicKeySizeByECType(ecType) // public key
-	}
-	return footerSize
-}
-
-func (s *SignerUtility) calculateFillerSize(fwCode []byte) int {
-	fillerLength := s.ProgFileSize - (len(fwCode) + s.calculateFooterSize())
-	return fillerLength
-}
-
-func saveBufferToFile(buf *bytes.Buffer, filePath string) error {
-	if err := ioutil.WriteFile(filePath, buf.Bytes(), os.ModePerm); err != nil {
-		return err
-	}
-	fmt.Println("File saved: ", filePath)
-	return nil
-}
-
-func stringToUint8(s string) (uint8, error) {
-	intValue, err := strconv.ParseUint(s, 10, 8)
-	if err != nil {
-		return 0, fmt.Errorf("can`t convert %s string to uint8: %s", s, err)
-	}
-	return uint8(intValue), nil
-}
-
-func stringToUint32(s string) (uint32, error) {
-	intValue, err := strconv.ParseUint(s, 10, 32)
-	if err != nil {
-		return 0, fmt.Errorf("can`t convert %s string to uint32: %s", s, err)
-	}
-	return uint32(intValue), nil
 }

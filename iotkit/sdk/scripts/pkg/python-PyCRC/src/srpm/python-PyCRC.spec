@@ -10,17 +10,11 @@ License:          GPLv3
 URL:              https://github.com/cristianav/PyCRC
 Source0:          %{pkg_name}-%{version}.tar.gz
 
-BuildRequires:    python2-devel
-BuildRequires:    python2-setuptools
 BuildRequires:    python3-devel
 BuildRequires:    python3-setuptools
 
 BuildArch:        noarch
 %description      %{_description}
-
-%package -n       python2-%{pkg_name}
-Summary:          %{summary}
-%description -n   python2-%{pkg_name}     %{_description}
 
 %package -n       python3-%{pkg_name}
 Summary:          %{summary}
@@ -30,23 +24,10 @@ Summary:          %{summary}
 %setup -q -n PyCRC-%{version}
 
 %build
-%py2_build
 %py3_build
 
 %install
-%py2_install
 %py3_install
-
-%files -n python2-%{pkg_name}
-%doc AUTHORS.rst     
-%doc CONTRIBUTING.rst
-%doc HISTORY.rst     
-%doc LICENSE         
-%doc MANIFEST.in     
-%doc PKG-INFO        
-%doc README.rst      
-%{python2_sitelib}/PyCRC/
-%{python2_sitelib}/PyCRC-%{version}-py2.*.egg-info
 
 %files -n python3-%{pkg_name}
 %doc AUTHORS.rst     
