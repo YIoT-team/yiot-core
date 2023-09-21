@@ -101,7 +101,8 @@ _verify_owner_cert(const vs_cert_t *cert) {
     uint16_t sign_sz = vs_secmodule_get_signature_len(sign->ec_type);
     const uint8_t *signer_key = &sign->raw_sign_pubkey[sign_sz];
     size_t signer_key_sz = vs_secmodule_get_pubkey_len(sign->ec_type);
-    STATUS_CHECK_RET(vs_provision_factory_present(signer_key, signer_key_sz), "Owner doesn't belong to ours Root of Trust");
+    STATUS_CHECK_RET(vs_provision_factory_present(signer_key, signer_key_sz),
+                     "Owner doesn't belong to ours Root of Trust");
 
     STATUS_CHECK_RET(vs_users_get_amount(VS_USER_OWNER, &users_amount), "Cannot get amount of device Owners");
 

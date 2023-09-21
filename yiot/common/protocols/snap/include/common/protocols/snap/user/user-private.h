@@ -31,7 +31,7 @@
 #pragma GCC diagnostic ignored "-Wmultichar"
 typedef enum { VS_PC_SERVICE_ID = HTONL_IN_COMPILE_TIME('_PC_') } vs_pc_t;
 
-#define PC_JSON_SZ_MAX (768)
+#define PC_JSON_SZ_MAX (2048)
 
 typedef enum {
     VS_PC_PCMD = HTONL_IN_COMPILE_TIME('PCMD'), /* PC comManD */
