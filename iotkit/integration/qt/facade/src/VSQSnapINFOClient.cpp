@@ -192,7 +192,7 @@ VSQSnapInfoClient::timerEvent(QTimerEvent *event) {
                 continue;
             }
 
-            constexpr auto deadDelayPollingIntervals = 3;
+            constexpr auto deadDelayPollingIntervals = 5;
             constexpr auto SecToMSec = 1000;
 
             auto deadDelayMSec = device.m_pollingInterval * deadDelayPollingIntervals * SecToMSec;
