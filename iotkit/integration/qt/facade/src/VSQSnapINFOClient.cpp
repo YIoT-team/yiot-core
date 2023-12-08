@@ -175,6 +175,8 @@ VSQSnapInfoClient::getDevice(const struct VirgilIoTKit::vs_netif_t *src_netif, c
         m_devicesInfo.push_back(VSQDeviceInfo(mac));
         device = &m_devicesInfo.last();
         emit fireNewDevice(src_netif, *device);
+    } else if (!device->m_isActive) {
+        emit fireNewDevice(src_netif, *device);
     }
 
     return *device;
@@ -190,7 +192,7 @@ VSQSnapInfoClient::timerEvent(QTimerEvent *event) {
                 continue;
             }
 
-            constexpr auto deadDelayPollingIntervals = 3;
+            constexpr auto deadDelayPollingIntervals = 5;
             constexpr auto SecToMSec = 1000;
 
             auto deadDelayMSec = device.m_pollingInterval * deadDelayPollingIntervals * SecToMSec;

@@ -80,7 +80,7 @@ _pc_response_processor(const vs_mac_addr_t *dev_mac,
 
     vs_status_e res = is_ack ? VS_CODE_OK : VS_CODE_ERR_SNAP_UNKNOWN;
     uint16_t str_sz;
-    const char *json = (const char *)response;
+    char *json = (char *)response;
 
     // Check input parameters
     CHECK_NOT_ZERO_RET(dev_mac, VS_CODE_ERR_INCORRECT_ARGUMENT);
@@ -88,6 +88,16 @@ _pc_response_processor(const vs_mac_addr_t *dev_mac,
     CHECK_NOT_ZERO_RET(response_sz <= PC_JSON_SZ_MAX, VS_CODE_ERR_INCORRECT_ARGUMENT);
     str_sz = strnlen(json, PC_JSON_SZ_MAX);
     ++str_sz;
+    // Check length is less than buffer size
+    if (str_sz >= response_sz) {
+        str_sz = response_sz;
+    }
+
+    // Make sure zero termination
+    if (str_sz > 0) {
+        json[response_sz - 1] = 0x00;
+    }
+
     CHECK_NOT_ZERO_RET(str_sz <= PC_JSON_SZ_MAX, VS_CODE_ERR_INCORRECT_ARGUMENT);
 
     if (_impl.device_state_update) {
