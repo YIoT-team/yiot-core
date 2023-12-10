@@ -175,8 +175,6 @@ VSQSnapInfoClient::getDevice(const struct VirgilIoTKit::vs_netif_t *src_netif, c
         m_devicesInfo.push_back(VSQDeviceInfo(mac));
         device = &m_devicesInfo.last();
         emit fireNewDevice(src_netif, *device);
-    } else if (!device->m_isActive) {
-        emit fireNewDevice(src_netif, *device);
     }
 
     return *device;

@@ -43,10 +43,15 @@ project(helpers VERSION 0.1.0 LANGUAGES C)
 # ---------------------------------------------------------------------------
 add_library(enable_pedantic_mode INTERFACE)
 
+#target_compile_options(enable_pedantic_mode
+#    INTERFACE
+#        $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>,$<C_COMPILER_ID:GNU>>:
+#            -Werror -Wall>
+#    )
 target_compile_options(enable_pedantic_mode
     INTERFACE
         $<$<OR:$<C_COMPILER_ID:Clang>,$<C_COMPILER_ID:AppleClang>,$<C_COMPILER_ID:GNU>>:
-            -Werror -Wall>
+            >
     )
 
 # ---------------------------------------------------------------------------

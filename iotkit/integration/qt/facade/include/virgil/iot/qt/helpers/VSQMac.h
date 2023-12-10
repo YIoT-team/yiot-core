@@ -61,7 +61,7 @@
 #ifndef VIRGIL_IOTKIT_QT_MAC_H
 #define VIRGIL_IOTKIT_QT_MAC_H
 
-#include <QtCore>
+#include <QtCore5Compat>
 #include <virgil/iot/protocols/snap/snap-structs.h>
 
 /** Virgil IoT Kit device MAC address */

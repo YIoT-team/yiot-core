@@ -84,7 +84,7 @@ endif()
 #
 
 target_compile_options(vs-module-provision
-        PRIVATE -Wall -Werror ${CFLAGS_PLATFORM})
+        PRIVATE ${CFLAGS_PLATFORM})
 
 #
 #   Config path

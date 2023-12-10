@@ -164,7 +164,7 @@ VSQNetifBLE::prepareNotificationReceiver() {
 
     if (notificationCharacteristic.isValid()) {
         // Setup notifications from external device
-        QLowEnergyDescriptor notification = notificationCharacteristic.descriptor(QBluetoothUuid::ClientCharacteristicConfiguration);
+        QLowEnergyDescriptor notification = notificationCharacteristic.clientCharacteristicConfiguration(); //.descriptor(QBluetoothUuid::ClientCharacteristicConfiguration);
         if (!notification.isValid()) {
             VS_LOG_ERROR("Invalid notification");
             return false;
@@ -248,7 +248,8 @@ VSQNetifBLE::open(const QBluetoothDeviceInfo device) {
     deactivate();
     VSQNetifBase::resetPacketForced();  // Force packet reset
 
-    m_leController = QSharedPointer <QLowEnergyController> (new QLowEnergyController(device));
+    //m_leController = QSharedPointer <QLowEnergyController> (new QLowEnergyController(device));
+    m_leController = QSharedPointer<QLowEnergyController>(QLowEnergyController::createCentral(device));
     connect(m_leController.data(), SIGNAL(connected()),
             this, SLOT(onDeviceConnected()));
     connect(m_leController.data(), SIGNAL(error(QLowEnergyController::Error)),

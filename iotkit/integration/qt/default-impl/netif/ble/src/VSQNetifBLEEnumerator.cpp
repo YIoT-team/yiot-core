@@ -171,7 +171,7 @@ VSQNetifBLEEnumerator::startDiscovery() {
     QBluetoothDeviceDiscoveryAgent *discoveryAgent = new QBluetoothDeviceDiscoveryAgent(this);
     discoveryAgent->setLowEnergyDiscoveryTimeout(kBLEDiscoverPeriodMS);
 
-    discoveryAgent->setInquiryType(QBluetoothDeviceDiscoveryAgent::LimitedInquiry);
+    //discoveryAgent->setInquiryType(QBluetoothDeviceDiscoveryAgent::LimitedInquiry);
     connect(discoveryAgent,
             &QBluetoothDeviceDiscoveryAgent::deviceDiscovered,
             this,
@@ -192,7 +192,8 @@ VSQNetifBLEEnumerator::startDiscovery() {
             this,
             &VSQNetifBLEEnumerator::onDiscoveryFinished);
 
-    connect(discoveryAgent, SIGNAL(error(QBluetoothDeviceDiscoveryAgent::Error)), this, SLOT(onDiscoveryFinished()));
+    //connect(discoveryAgent, SIGNAL(error(QBluetoothDeviceDiscoveryAgent::Error)), this, SLOT(onDiscoveryFinished()));
+    connect(discoveryAgent, SIGNAL(errorOccurred(QBluetoothDeviceDiscoveryAgent::Error)), this, SLOT(onDiscoveryFinished()));
 
     discoveryAgent->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
 }
