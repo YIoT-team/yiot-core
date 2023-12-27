@@ -418,10 +418,23 @@ vs_license_plain_data_parse(uint8_t *license_data, uint16_t license_data_sz,
     CHECK(VS_JSON_ERR_OK ==
                   json_get_val_str(&jobj, VS_LICENSE_JSON_MAC_FIELD, tmp_data, VS_LICENSE_DATA_MAX_SZ),
           "Cannot get MAC address");
+
+#if !defined(WIN32)
     CHECK( 6 == sscanf(tmp_data, "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx",
                       &mac->bytes[0], &mac->bytes[1], &mac->bytes[2],
                       &mac->bytes[3], &mac->bytes[4], &mac->bytes[5] ),
           "Cannot convert MAC address");
+#else
+    unsigned int tmp2[6];
+    CHECK(6 == sscanf(tmp_data, "%x:%x:%x:%x:%x:%x", &tmp2[0], &tmp2[1], &tmp2[2], &tmp2[3], &tmp2[4], &tmp2[5]),
+          "Cannot convert MAC address");
+    mac->bytes[0] = tmp2[0];
+    mac->bytes[1] = tmp2[1];
+    mac->bytes[2] = tmp2[2];
+    mac->bytes[3] = tmp2[3];
+    mac->bytes[4] = tmp2[4];
+    mac->bytes[5] = tmp2[5];
+#endif
 
     // Get Key Type
     CHECK(VS_JSON_ERR_OK ==
