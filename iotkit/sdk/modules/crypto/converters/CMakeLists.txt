@@ -56,9 +56,11 @@ virgil_find_package (MbedTLS 2.4)
 #
 #   Converters library
 #
-add_library(converters
-        SHARED
-        )
+if(KS_PLATFORM STREQUAL "ios")
+        add_library(converters)
+else()
+        add_library(converters SHARED)
+endif()
 
 if(ANDROID)
     set_target_properties(converters PROPERTIES SUFFIX "-${ANDROID_ABI}.so")
